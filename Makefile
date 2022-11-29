@@ -18,7 +18,7 @@ WARNINGS := -Wall -Wextra -Wswitch-enum -Wstack-protector -Wdate-time -Walloc-ze
 WARNINGS_NO := -Wno-shadow -Wno-unused-parameter
 IF_WINDOWS := -fno-stack-protector
 CXXFLAGS := -std=c++17 -pedantic-errors $(WARNINGS) $(WARNINGS_NO)
-LDFLAGS  := -lstdc++ -lm
+LDFLAGS  := -lstdc++ -lm -lboost_program_options
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)/objects
 APP_DIR  := $(BUILD)/apps
@@ -26,6 +26,10 @@ TARGET   := main
 INCLUDE  := -Iinclude/ -I/usr/local/include
 SRC      :=                      \
 	 $(wildcard src/*.cpp)         \
+	 $(wildcard src/file/*.cpp)         \
+   $(wildcard src/config/*.cpp)         \
+
+
 
 
 OBJECTS  := $(SRC:%.cpp=$(OBJ_DIR)/%.o)
