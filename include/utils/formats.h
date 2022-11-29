@@ -14,6 +14,18 @@ void IntToLittleEndianHex(unsigned char *buff, long long num) {
   buff[3] = num & 0xFF;
 }
 
+long long hexToInt(unsigned char *sector, long long offset,
+                   long long size_in_bytes) {
+  long long result;
+  std::stringstream ss;
+  ss << std::hex << std::setfill('0');
+  for (long long i = 0; i < size_in_bytes; i++) {
+    ss << std::setw(2) << (long long)sector[offset + i];
+  }
+  ss >> result;
+  return result;
+}
+
 std::string getHex(unsigned char *arr, long long length, long long cuts = 512) {
   std::stringstream ss;
   ss << std::hex << std::setfill('0');

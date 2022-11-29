@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "file/formats/fat12.h"
+
 void FileMaker::makeFile() {
   std::ofstream file(fname, std::ios::binary | std::ios::out);
   // write file in size bytes
@@ -37,4 +39,17 @@ void FileMaker::makeFile() {
   empty = std::vector<char>(1, 0);
   printf("writing %lld bytes\n", byte_num);
   writeBlock(file, empty, byte_num);
+}
+
+void FileMaker::formatFile(Format_e f) {
+  Format fmt(fname, size);
+  switch (f) {
+  case FAT12:
+    fmt = Fat12(fname, size);
+    fmt.format();
+    break;
+  case UNKNOWN:
+    printf("invalid format\n");
+    return;
+  }
 }

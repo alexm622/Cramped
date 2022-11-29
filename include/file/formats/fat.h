@@ -5,14 +5,21 @@
 
 class Fat : public Format {
 public:
-  Fat(std::ofstream &file, lli type);
+  Fat(char *fname, lli size) : Format(fname, size) {
+    this->fname = fname;
+    this->size = size;
+  };
+  ~Fat() { delete fname; }
   void format() override;
 
   virtual void writeBPB();
-  virtual void writeexBR();
+  virtual void writeExBR();
   virtual void writeExtras();
+  virtual Format_e getFatType();
 
 private:
+  char *fname;
+  lli size;
 };
 
 #endif

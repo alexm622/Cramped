@@ -1,6 +1,7 @@
 #include "main.h"
 
 #include "file/filemaker.h"
+#include "file/formats/format.h"
 
 #include <string>
 
@@ -15,6 +16,7 @@ int main(int argc, char *argv[]) {
   std::string fname = "test";
   FileMaker fm(fname.c_str(), (lli)std::pow(1024, 2));
   fm.makeFile();
+  fm.formatFile(FAT12);
   return 0;
 }
 

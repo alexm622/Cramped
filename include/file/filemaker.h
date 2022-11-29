@@ -20,7 +20,7 @@ public:
   ~FileMaker() { delete[] fname; };
 
   void makeFile();
-  void formatFile(Format_t f);
+  void formatFile(Format_e f);
 
 private:
   char *fname;
@@ -35,6 +35,6 @@ private:
     }
   };
 
-  Format getFormat(Format_t f_e);
+  Format getFormat(Format_e f_e);
 };
 #endif

@@ -5,17 +5,20 @@
 
 #include "utils/types.h"
 
-enum Format_t { FAT12 };
+enum Format_e { UNKNOWN, FAT12 };
 
 class Format {
 public:
-  Format(std::ofstream &file, lli type);
-  ~Format();
+  Format(char *fname, lli size) {
+    this->fname = fname;
+    this->size = size;
+  };
+  ~Format() { delete fname; };
   virtual void format();
 
 private:
-  lli type;
-  std::ofstream &file;
+  lli size;
+  char *fname;
 };
 
 #endif
