@@ -9,8 +9,6 @@
 
 #include "file/formats/format.h"
 
-typedef long long int lli;
-
 class FileMaker {
 public:
   FileMaker(const char *fname, lli size) {
@@ -22,7 +20,7 @@ public:
   ~FileMaker() { delete[] fname; };
 
   void makeFile();
-  void formatFile(Format f);
+  void formatFile(Format_t f);
 
 private:
   char *fname;
@@ -36,5 +34,7 @@ private:
       }
     }
   };
+
+  Format getFormat(Format_t f_e);
 };
 #endif

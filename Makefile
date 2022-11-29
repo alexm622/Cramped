@@ -23,11 +23,12 @@ BUILD    := ./build
 OBJ_DIR  := $(BUILD)/objects
 APP_DIR  := $(BUILD)/apps
 TARGET   := main
-INCLUDE  := -Iinclude/ -I/usr/local/include
-SRC      :=                      \
-	 $(wildcard src/*.cpp)         \
+INCLUDE  := -Iinclude/ -I/usr/local/include -Iinclude/file/formats
+SRC      :=                       	    \
+	 $(wildcard src/*.cpp)        	    \
 	 $(wildcard src/file/*.cpp)         \
-   $(wildcard src/config/*.cpp)         \
+	 $(wildcard src/file/format/*.cpp)  \
+     	 $(wildcard src/config/*.cpp)       \
 
 
 
