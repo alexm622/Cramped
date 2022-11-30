@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "file/formats/fat12.h"
+#include "file/formats/format.h"
 
 void FileMaker::makeFile() {
   std::ofstream file(fname, std::ios::binary | std::ios::out);
@@ -42,14 +43,15 @@ void FileMaker::makeFile() {
 }
 
 void FileMaker::formatFile(Format_e f) {
-  Format fmt(fname, size);
+  Format *fmt = new Format(fname, size);
   switch (f) {
   case FAT12:
-    fmt = Fat12(fname, size);
-    fmt.format();
+    fmt = new Fat12(fname, size);
+    fmt->format();
     break;
   case UNKNOWN:
     printf("invalid format\n");
+
     return;
   }
 }

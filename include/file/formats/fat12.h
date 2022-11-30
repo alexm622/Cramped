@@ -5,14 +5,12 @@
 
 class Fat12 : public Fat {
 public:
-  Fat12(char *fname, lli size) : Fat(fname, size) {
-    this->fname = fname;
-    this->size = size;
-  };
-  ~Fat12() { delete fname; }
+  Fat12(char *fname, lli size) : Fat(fname, size), fname(fname), size(size){};
   void writeBPB() override;
   void writeExBR() override;
   void writeExtras() override;
+
+  Format_e getFatType() override;
 
 private:
   char *fname;

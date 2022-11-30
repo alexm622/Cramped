@@ -5,17 +5,13 @@
 
 class Fat : public Format {
 public:
-  Fat(char *fname, lli size) : Format(fname, size) {
-    this->fname = fname;
-    this->size = size;
-  };
-  ~Fat() { delete fname; }
-  void format() override;
+  Fat(char *fname, lli size) : Format(fname, size), fname(fname), size(size){};
+  virtual void format() override;
 
-  virtual void writeBPB();
-  virtual void writeExBR();
-  virtual void writeExtras();
-  virtual Format_e getFatType();
+  virtual void writeBPB(){};
+  virtual void writeExBR(){};
+  virtual void writeExtras(){};
+  virtual Format_e getFatType() { return UNKNOWN; };
 
 private:
   char *fname;

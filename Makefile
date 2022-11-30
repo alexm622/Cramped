@@ -17,7 +17,7 @@ CXX      := g++
 WARNINGS := -Wall -Wextra -Wswitch-enum -Wstack-protector -Wdate-time -Walloc-zero -Walloca
 WARNINGS_NO := -Wno-shadow -Wno-unused-parameter
 IF_WINDOWS := -fno-stack-protector
-CXXFLAGS := -std=c++17 -pedantic-errors $(WARNINGS) $(WARNINGS_NO)
+CXXFLAGS := -std=c++17 -pedantic-errors -fPIC $(WARNINGS) $(WARNINGS_NO)
 LDFLAGS  := -lstdc++ -lm -lboost_program_options
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)/objects

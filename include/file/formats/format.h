@@ -9,12 +9,10 @@ enum Format_e { UNKNOWN, FAT12 };
 
 class Format {
 public:
-  Format(char *fname, lli size) {
-    this->fname = fname;
-    this->size = size;
-  };
-  ~Format() { delete fname; };
-  virtual void format();
+  Format(char *fname, lli size) : size(size), fname(fname){};
+  virtual void format(){};
+
+  void setSize(lli size) { this->size = size; };
 
 private:
   lli size;
