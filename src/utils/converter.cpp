@@ -1,12 +1,6 @@
-#ifndef FORMATS_H
-#define FORMATS_H
+#include "utils/converter.h"
 
-#include <iomanip>
-#include <ios>
-#include <iostream>
-#include <string>
-
-void IntToLittleEndianHex(unsigned char *buff, long long num) {
+void Converter::IntToLittleEndianHex(unsigned char *buff, long long num) {
   num = __builtin_bswap32(num);
   buff[0] = (num >> 24) & 0xFF;
   buff[1] = (num >> 16) & 0xFF;
@@ -38,5 +32,3 @@ std::string getHex(unsigned char *arr, long long length, long long cuts = 512) {
   ss << std::endl;
   return ss.str();
 }
-
-#endif

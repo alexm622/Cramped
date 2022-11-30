@@ -1,6 +1,6 @@
 #include "file/formats/fat12.h"
 
-#include "utils/formats.h"
+#include "utils/converter.h"
 
 #include <ios>
 
@@ -17,6 +17,12 @@ void Fat12::writeBPB() {
   delete[] data;
   std::string str = "alexcore";
   file.write(str.c_str(), 8);
+
+  int bytes_per_sector = 512;
+  unsigned char *buf = new unsigned char[4];
+  Converter::IntToLittleEndianHex(buf, bytes_per_sector);
+  printf("as hex:%x%x%x%x\n", buf[0], buf[1], buf[2], buf[3]);
+  file.write((const char *)buf, 4);
 }
 
 void Fat12::writeExBR() { return; }

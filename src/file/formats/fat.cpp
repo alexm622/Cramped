@@ -2,6 +2,6 @@
 
 void Fat::format() {
   writeBPB();
-  writeBPB();
+  writeExBR();
   writeExtras();
 }
