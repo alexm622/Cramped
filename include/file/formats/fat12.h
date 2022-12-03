@@ -5,7 +5,8 @@
 
 class Fat12 : public Fat {
 public:
-  Fat12(char *fname, lli size) : Fat(fname, size), fname(fname), size(size){};
+  Fat12(char *fname, lli size)
+      : Fat(fname, size, FAT12), fname(fname), size(size){};
   void writeBPB() override;
   void writeExBR() override;
   void writeExtras() override;

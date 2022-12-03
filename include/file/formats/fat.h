@@ -5,7 +5,8 @@
 
 class Fat : public Format {
 public:
-  Fat(char *fname, lli size) : Format(fname, size), fname(fname), size(size){};
+  Fat(char *fname, lli size, Format_e f)
+      : Format(fname, size, f), fname(fname), size(size), f(f){};
   virtual void format() override;
 
   virtual void writeBPB(){};
@@ -16,6 +17,7 @@ public:
 private:
   char *fname;
   lli size;
+  Format_e f;
 };
 
 #endif

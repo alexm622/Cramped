@@ -22,9 +22,15 @@ public:
   void makeFile();
   void formatFile(Format_e f);
 
+  void setFormatType(Format_e f) { this->fmt = f; };
+
+  Format readFormat();
+
 private:
   char *fname;
   lli size = 0;
+  Format_e fmt = UNKNOWN;
+  Format *f;
 
   void writeBlock(std::ofstream &file, std::vector<char> &vec, lli num) {
     for (int i = 0; i < num; i++) {

@@ -43,15 +43,20 @@ void FileMaker::makeFile() {
 }
 
 void FileMaker::formatFile(Format_e f) {
-  Format *fmt = new Format(fname, size);
+  this->f = new Format(fname, size, f);
   switch (f) {
   case FAT12:
-    fmt = new Fat12(fname, size);
-    fmt->format();
+    this->f = new Fat12(fname, size);
+    this->f->format();
     break;
   case UNKNOWN:
     printf("invalid format\n");
 
     return;
   }
+}
+
+Format FileMaker::readFormat() {
+  this->f = new Format(fname, size, fmt);
+  return *this->f;
 }
