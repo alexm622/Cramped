@@ -12,11 +12,16 @@ bool Mount::mountFile(Format f, std::string destination) {
     printf("cannot mount, there is no filesystem\n");
     return false;
   }
-  createLoop(f);
+  std::string loopname = createLoop(f);
+  f.setLoopDevice(loopname);
+  std::filesystem::path dest = destination;
+  dest = std::filesystem::absolute(dest);
+  printf("attempting to mount %s at %s\n", f.getLoopDevice().c_str(),
+         dest.c_str());
+
   int ret =
-      mount(reinterpret_cast<const char *>(f.getFname()), destination.c_str(),
-            reinterpret_cast<const char *>(f.getFormatStr().c_str()), 0x00,
-            "defaults");
+      mount(f.getLoopDevice().c_str(), dest.c_str(),
+            reinterpret_cast<const char *>(f.getFormatStr().c_str()), 0x00, "");
   if (ret != 0) {
     interpretError(ret, destination, f);
     return false;
@@ -40,32 +45,43 @@ void Mount::interpretError(int err, std::string path, Format f) {
     break;
   case (ELOOP):
     printf("ELOOP\n");
+    break;
   case (EMFILE):
     printf("table of dummy devices is full\n");
+    break;
   case (ENAMETOOLONG):
     printf("name too long\n");
+    break;
   case (ENODEV):
     printf("filesystem not configured in the kernel\n");
+    break;
   case (ENOENT):
     printf("bad pathname\n");
+    break;
   case (ENOMEM):
     printf("kernel could not allocate memory for mounting\n");
+    break;
   case (ENOTBLK):
     printf("source is not a block device\n");
+    break;
   case (ENOTDIR):
     printf("target is not a directory\n");
+    break;
   case (ENXIO):
     printf("the number of block device is out of range\n");
+    break;
   case (EPERM):
     printf("insufficient permissions\n");
+    break;
   case (EROFS):
     printf("this filesystem is read only\n");
+    break;
   default:
     printf("unknown error: %d\n", errno);
   }
 }
 
-void Mount::createLoop(Format f) {
+std::string Mount::createLoop(Format f) {
   int loopctlfd, loopfd, backingfile;
   long devnr;
   char loopname[4096];
@@ -93,24 +109,36 @@ void Mount::createLoop(Format f) {
 
   if (ioctl(loopfd, LOOP_SET_FD, backingfile) == -1)
     errExit("ioctl-LOOP_SET_FD");
-  f.setLoopDevice(loopname);
+  std::string loopname_str = loopname;
+  return loopname_str;
 }
 
 void Mount::removeRedundantLoop(Format f) {
   std::vector<std::pair<int, std::string>> loops = getLoops();
-  int loopfd;
-
+  std::filesystem::path path = f.getFname();
+  int parent = open(path.c_str(), O_RDWR);
+  struct stat file_stat;
+  fstat(parent, &file_stat);
+  unsigned long inode = file_stat.st_ino;
+  close(parent);
   for (std::pair<int, std::string> p : loops) {
-    loopfd = open(p.second.c_str(), O_RDWR);
+    int loopfd = open(p.second.c_str(), O_RDWR);
     if (loopfd == -1) {
       printf("%s failed\n", p.second.c_str());
       continue;
     }
     loop_info li = getLoopInfo(loopfd);
-    printf("lo #%d name: %s\n, fd: %lu \n", li.lo_number, li.lo_name,
+    printf("lo #%d name: %s, fd: %lu \n", li.lo_number, li.lo_name,
            li.lo_inode);
-    printf("lo #%d file_path:%s\n", li.lo_number,
-           fdToFPath(li.lo_inode).c_str());
+    if (li.lo_inode == inode) {
+      char *fname = new char[64];
+      sprintf(fname, "/dev/loop%d", li.lo_number);
+      int r = ioctl(loopfd, LOOP_CLR_FD, li.lo_number);
+      if (r == -1) {
+        printf("loop%d busy\n", li.lo_number);
+      }
+      close(loopfd);
+    }
   }
 }
 
@@ -123,18 +151,40 @@ std::vector<std::pair<int, std::string>> Mount::getLoops() {
     files.push_back(entry.path());
   }
 
-  // remove non-loop items
-  std::regex loop("/dev/loop[0-9]*");
+  std::regex loop("\\/dev\\/loop[0-9]{1,}");
+
+  std::fstream fs;
+  fs.open("/proc/partitions", std::ios::in);
+  std::vector<std::string> currloops;
+  while (fs) {
+    std::string device;
+    std::getline(fs, device);
+    std::regex partitions("loop[0-9]{1,}");
+    std::smatch m;
+    std::regex_search(device, m, partitions);
+    if (m.empty()) {
+      continue;
+    }
+    device = m[0];
+    device = regex_replace(device, std::regex("loop"), "");
+    currloops.push_back(device);
+  }
+  fs.close();
   for (std::string s : files) {
+
     if (std::regex_match(s, loop)) {
-      printf("found loop %s\n", s.c_str());
+      // printf("found loop %s\n", s.c_str());
       int number;
       std::string name = s;
       std::regex getNumber("/dev/loop");
       s = std::regex_replace(s, getNumber, "");
+
       number = std::stoi(s);
-      std::pair<int, std::string> pair(number, name);
-      loops.push_back(pair);
+
+      if (std::count(currloops.begin(), currloops.end(), s)) {
+        std::pair<int, std::string> pair(number, name);
+        loops.push_back(pair);
+      }
     }
   }
 

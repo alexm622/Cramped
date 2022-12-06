@@ -18,7 +18,7 @@ public:
 
 private:
   static void interpretError(int err, std::string path, Format f);
-  static void createLoop(Format f);
+  static std::string createLoop(Format f);
   static void removeRedundantLoop(Format f);
   static std::vector<std::pair<int, std::string>> getLoops();
   static loop_info getLoopInfo(int fd);

@@ -29,15 +29,19 @@ public:
 
   void setLoopDevice(const std::string &loopDevice) {
     this->loopDevice = loopDevice;
+    printf("loopDevice is now %s\n", this->loopDevice.c_str());
   };
 
-  std::string getLoopDevice() { return this->loopDevice; };
+  std::string getLoopDevice() {
+    printf("loopDevice is now %s\n", this->loopDevice.c_str());
+    return this->loopDevice;
+  };
 
 private:
   lli size;
   char *fname;
   Format_e f;
-  std::string loopDevice = "";
+  std::string loopDevice;
 };
 
 #endif
