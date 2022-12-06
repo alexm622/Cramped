@@ -27,10 +27,17 @@ public:
 
   char *getFname() { return fname; };
 
+  void setLoopDevice(const std::string &loopDevice) {
+    this->loopDevice = loopDevice;
+  };
+
+  std::string getLoopDevice() { return this->loopDevice; };
+
 private:
   lli size;
   char *fname;
   Format_e f;
+  std::string loopDevice = "";
 };
 
 #endif
