@@ -16,12 +16,22 @@ bool Mount::mountFile(Format f, std::string destination) {
   f.setLoopDevice(loopname);
   std::filesystem::path dest = destination;
   dest = std::filesystem::absolute(dest);
+
+  // get gid and uid of folder
+  int destfd = open(dest.c_str(), O_RDWR);
+  struct stat file_stat;
+  fstat(destfd, &file_stat);
+  int uid = file_stat.st_uid;
+  int gid = file_stat.st_gid;
+  char *opts = new char[64];
+  sprintf(opts, "uid=%d,gid=%d,umask=0750,fmask=0750,dmask=0750", uid, gid);
+
   printf("attempting to mount %s at %s\n", f.getLoopDevice().c_str(),
          dest.c_str());
 
   int ret =
       mount(f.getLoopDevice().c_str(), dest.c_str(),
-            reinterpret_cast<const char *>(f.getFormatStr().c_str()), 0x00, "");
+            reinterpret_cast<const char *>(f.getFormatStr().c_str()), 0, opts);
   if (ret != 0) {
     interpretError(ret, destination, f);
     return false;
@@ -87,6 +97,7 @@ std::string Mount::createLoop(Format f) {
   char loopname[4096];
 
   removeRedundantLoop(f);
+  // TODO add autoclear flag to device
 
   loopctlfd = open("/dev/loop-control", O_RDWR);
   if (loopctlfd == -1)
@@ -137,6 +148,7 @@ void Mount::removeRedundantLoop(Format f) {
       if (r == -1) {
         printf("loop%d busy\n", li.lo_number);
       }
+      delete[] fname;
       close(loopfd);
     }
   }
