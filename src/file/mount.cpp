@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 bool Mount::mountFile(Format f, std::string destination) {
   if (f.getFormat() == UNKNOWN) {

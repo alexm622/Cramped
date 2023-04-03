@@ -5,6 +5,7 @@
 #include "file/mount.h"
 
 #include <string>
+#include <iterator>
 
 po::options_description Main::desc("Cramped usage");
 po::variables_map Main::vm;
@@ -25,7 +26,14 @@ int main(int argc, char *argv[]) {
 }
 
 void Main::add_arguments() {
+  
   desc.add_options()("help,h", "Display this help message");
+  desc.add_options()("create,c",po::value<std::string>()->required()->value_name("file"),
+      "create a new device" "where <file> is the name of the file");
+  desc.add_options()("mount,m", po::value<std::string>()->required()->value_name("file"),
+      "mount a file");
+  desc.add_options()("disconnect,D",po::value<std::string>()->required()->value_name("device"),
+      "disconnect device");
 }
 
 void Main::map_variables(int argc, char **argv) {
@@ -33,5 +41,6 @@ void Main::map_variables(int argc, char **argv) {
 
   if (vm.count("help")) {
     std::cout << desc;
+    exit(0);
   }
 }

@@ -35,7 +35,15 @@ build/
 .ccls-cache/
 .vscode/
 
+#bear
 compile_commands.json
 
+#test files
 test
 test_m/
+
+#ccls
+.cache
+
+#asahi
+*.plist
