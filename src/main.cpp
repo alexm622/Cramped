@@ -10,17 +10,42 @@
 po::options_description Main::desc("Cramped usage");
 po::variables_map Main::vm;
 
+static bool create = false;
+static bool mount = false;
+static bool disconnect = false;
+
 int main(int argc, char *argv[]) {
   Main::add_arguments();
   Main::map_variables(argc, argv);
-
   // try creating a file?
   std::string fname = "test";
+
+  std::string directory = "test_m/";
+  if (Main::vm.count("create")){
+    create = true;
+    fname = Main::vm["create"].as<std::string>();
+  }
+
+  if (Main::vm.count("mount")){
+    mount = true;
+  }
+
+  if (Main::vm.count("disconnect")){
+    disconnect = true;
+  }
+
+  if(create + mount + disconnect > 1){
+    printf("too many args\n");
+    exit(1);
+  }
+  
+
+  
   FileMaker fm(fname.c_str(), (lli)std::pow(1024, 2));
   fm.setFormatType(FAT12);
-  Mount::mountFile(fm.readFormat(), "test_m/");
-  // fm.makeFile();
-  // fm.formatFile(FAT12);
+  Mount::mountFile(fm.readFormat(), directory);
+  fm.makeFile();
+  fm.formatFile(FAT12);
 
   return 0;
 }
@@ -37,10 +62,17 @@ void Main::add_arguments() {
 }
 
 void Main::map_variables(int argc, char **argv) {
+  try{
   po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);
 
   if (vm.count("help")) {
     std::cout << desc;
     exit(0);
   }
+  }catch(boost::program_options::error &e){
+        std::cout << "ERROR: " << e.what() << "\n";
+        std::cout << desc << "\n";
+        exit(1);
+  }
 }
+
