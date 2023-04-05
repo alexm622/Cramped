@@ -42,6 +42,7 @@ void FileMaker::makeFile() {
   writeBlock(file, empty, byte_num);
 }
 
+//format the file
 void FileMaker::formatFile(Format_e f) {
   this->f = new Format(fname, size, f);
   switch (f) {

@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <ios>
+//write bios parameter block
 void Fat12::writeBPB() {
   std::fstream file;
   file.open(fname);

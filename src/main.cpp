@@ -62,6 +62,8 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
+
+// add all the arguments
 void Main::add_arguments() {
   
   desc.add_options()("help,h", "Display this help message");
@@ -76,6 +78,7 @@ void Main::add_arguments() {
       "disconnect device");
 }
 
+//map the arguments to parameters
 void Main::map_variables(int argc, char **argv) {
   try{
   po::store(po::command_line_parser(argc, argv).options(desc).run(), vm);

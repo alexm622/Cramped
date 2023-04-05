@@ -33,6 +33,7 @@ bool Mount::mountFile(Format f, std::string destination) {
   int ret =
       mount(f.getLoopDevice().c_str(), dest.c_str(),
             reinterpret_cast<const char *>(f.getFormatStr().c_str()), 0, opts);
+  delete[] opts;
   if (ret != 0) {
     interpretError(ret, destination, f);
     return false;
@@ -124,7 +125,7 @@ std::string Mount::createLoop(Format f) {
   std::string loopname_str = loopname;
   return loopname_str;
 }
-
+//remove an already existing loop device
 void Mount::removeRedundantLoop(Format f) {
   std::vector<std::pair<int, std::string>> loops = getLoops();
   std::filesystem::path path = f.getFname();
@@ -154,7 +155,8 @@ void Mount::removeRedundantLoop(Format f) {
     }
   }
 }
-
+//get list of all mounted loop devices
+//return value is a vector of (loopnum, path)
 std::vector<std::pair<int, std::string>> Mount::getLoops() {
   std::vector<std::pair<int, std::string>> loops;
 
@@ -211,9 +213,4 @@ loop_info Mount::getLoopInfo(int fd) {
   return li;
 }
 
-std::string Mount::fdToFPath(unsigned long fd) {
-  struct stat sb;
-  std::string filePath = "";
-  int ret = fstat(fd, &sb);
-  return filePath;
-}
+

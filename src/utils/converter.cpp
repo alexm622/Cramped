@@ -7,7 +7,7 @@ void Converter::IntToLittleEndianHex(unsigned char *buff, long long num) {
   buff[2] = (num >> 8) & 0xFF;
   buff[3] = num & 0xFF;
 }
-
+//hexidecimal to integer
 long long hexToInt(unsigned char *sector, long long offset,
                    long long size_in_bytes) {
   long long result;
@@ -19,7 +19,7 @@ long long hexToInt(unsigned char *sector, long long offset,
   ss >> result;
   return result;
 }
-
+//get the hex value of a set of values
 std::string getHex(unsigned char *arr, long long length, long long cuts = 512) {
   std::stringstream ss;
   ss << std::hex << std::setfill('0');
