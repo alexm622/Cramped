@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
   std::string disconnect_str = fname;
 
   std::string directory = "test_m/";
+  Format_e format = UNKNOWN; 
   if (Main::vm.count("create")){
     create = true;
     fname = Main::vm["create"].as<std::string>();
@@ -35,6 +36,8 @@ int main(int argc, char *argv[]) {
   if (Main::vm.count("disconnect")){
     disconnect = true;
     disconnect_str = Main::vm["disconnect"].as<std::string>();
+  }
+  if (Main::vm.count("format")){
   }
 
   if(create){
@@ -86,5 +89,8 @@ void Main::map_variables(int argc, char **argv) {
         std::cout << desc << "\n";
         exit(1);
   }
+  
 }
-
+Format_e Main::format_from_string(std::string fmt){
+    return UNKNOWN;
+  }

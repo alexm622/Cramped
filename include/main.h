@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #include <iostream>
+#include <file/formats/format.h>
 
 #include <boost/program_options.hpp>
 
@@ -14,6 +15,7 @@ public:
 
   static void add_arguments();
   static void map_variables(int argc, char *argv[]);
+  static Format_e format_from_string(std::string fmt);
 
 private:
 };
