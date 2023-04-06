@@ -6,7 +6,7 @@
 
 #include "utils/types.h"
 
-enum Format_e { UNKNOWN, FAT12 };
+enum Format_e { UNKNOWN, FAT12, EXFAT };
 
 class Format {
 public:

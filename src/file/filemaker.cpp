@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "file/formats/fat12.h"
+#include "file/formats/exFat.h"
 #include "file/formats/format.h"
 
 void FileMaker::makeFile() {
@@ -49,6 +50,9 @@ void FileMaker::formatFile(Format_e f) {
   case FAT12:
     this->f = new Fat12(fname, size);
     this->f->format();
+    break;
+  case EXFAT:
+    this->f = new ExFat(fname, size);
     break;
   case UNKNOWN:
     printf("invalid format\n");
