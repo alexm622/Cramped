@@ -42,9 +42,9 @@ int main(int argc, char *argv[]) {
 
   if(create){
     FileMaker fm(fname.c_str(), (lli)std::pow(1024, 2));
-    fm.setFormatType(FAT12);
+    fm.setFormatType(EXFAT);
     fm.makeFile();
-    fm.formatFile(FAT12);
+    fm.formatFile(EXFAT);
   }else if(mount){
     FileMaker fm(fname.c_str(), (lli)std::pow(1024, 2));
     fm.setFormatType(FAT12);

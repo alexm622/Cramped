@@ -6,6 +6,8 @@ std::string Format::fmtToStr(Format_e fmt) {
     return "none";
   case (FAT12):
     return "vfat";
+  case (EXFAT):
+    return "exfat";
   default:
     return "none";
   }

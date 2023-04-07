@@ -16,12 +16,14 @@ void ExFat::format(){
 }
 
 void ExFat::writeBS(){
+  printf("writing BS");
   const int BYTES_PER_SECTOR_SHIFT = 9;
   //initialization
   std::fstream file;
   file.open(fname);
   file.seekp(0);
   char *data = new char[3];
+  unsigned char *buf = new unsigned char[4];
 
   std::string str = "cramped ";
   std::string fsName = "ExFat  ";
@@ -36,16 +38,14 @@ void ExFat::writeBS(){
 
   //filesystemname
   file.write(fsName.c_str(), 8);
-  
-  //mustbezero
-  for(int i = 0; i < 53; i++){
-    file.write(0x00, 1);
-  }
 
-  //partition offset
-  for(int i = 0; i < 8; i++){
-    file.write(0x00, 1);
+  //must be zero
+  buf[0] = 0x00;
+  for(int i =0; i < 53; i++){
+    file.write(reinterpret_cast<const char*>(buf),1);
   }
+  //partition offset
+  file.seekg(8,std::ios::cur);
 
   //volume length
 
@@ -56,8 +56,7 @@ void ExFat::writeBS(){
   const int cluster_count = 4;
 
 
-  unsigned char *buf = new unsigned char[4];
-
+  
   Converter::IntToLittleEndianHex(buf, num_sectors);
   file.write(reinterpret_cast<const char *>(buf), 4);
 
@@ -114,11 +113,12 @@ void ExFat::writeBS(){
   file.write(reinterpret_cast<const char *>(buf), 1);
 
   //drive select
-  file.write(reinterpret_cast<const char*>(0x23),1);
+  buf[0]=0x23;
+  file.write(reinterpret_cast<const char*>(buf),1);
 
   //percent in use
-  file.write(reinterpret_cast<const char*>(0x00),1);
-
+  buf[0]=0x00;
+  file.write(reinterpret_cast<const char*>(buf),1);
   //seek to bootsig
   file.seekp(0x1fe);
 
@@ -126,4 +126,10 @@ void ExFat::writeBS(){
   buf[0] = 0x55;
   buf[1] = 0xAA;
   file.write(reinterpret_cast<const char*>(buf),2);
+  printf("done writing bootsector");
 }
+
+void ExFat::writeEBS() {};
+void ExFat::writeOEMP(){};
+void ExFat::writeRS(){};
+void ExFat::writeBC(){};

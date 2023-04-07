@@ -53,6 +53,7 @@ void FileMaker::formatFile(Format_e f) {
     break;
   case EXFAT:
     this->f = new ExFat(fname, size);
+    this->f->format();
     break;
   case UNKNOWN:
     printf("invalid format\n");
