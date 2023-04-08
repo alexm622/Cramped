@@ -4,6 +4,7 @@
 
 #include "file/formats/fat12.h"
 #include "file/formats/exFat.h"
+#include "file/formats/ext2.h"
 #include "file/formats/format.h"
 
 void FileMaker::makeFile() {
@@ -54,6 +55,16 @@ void FileMaker::formatFile(Format_e f) {
   case EXFAT:
     this->f = new ExFat(fname, size);
     this->f->format();
+    break;
+  case EXT2:
+    this->f = new Ext2(fname, size);
+    this->f->format();
+    break;
+  case EXT4:
+    printf("ext4 is not yet implemented\n");
+    break;
+  case XFS:
+    printf("xfs is not yet implemented\n");
     break;
   case UNKNOWN:
     printf("invalid format\n");
