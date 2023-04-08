@@ -162,5 +162,16 @@ void ExFat::writeOEMP(){
   file.seekg(32);
 
 };
-void ExFat::writeRS(){};
-void ExFat::writeBC(){};
+
+//region structure
+void ExFat::writeRS(){
+};
+
+//TODO this should be completed
+void ExFat::writeBC(){
+  //boot checksum
+  uint32_t NumberOfBytes = (uint32_t)BYTES_PER_SECTOR * 11;
+  uint32_t  Checksum = 0;
+  uint32_t Index;
+ 
+};
