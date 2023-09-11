@@ -40,6 +40,14 @@ int main(int argc, char *argv[]) {
   if (Main::vm.count("format")){
   }
 
+  //get the size
+  uint64_t size = std::pow(1024, 2);
+  //std::string size_str;
+  if (Main::vm.count("size")){
+    //size_str = Main::vm["size"].as<std::string>();
+    printf("entered %s for size\n", Main::vm["size"].as<std::string>().c_str());
+  }
+
   if(create){
     FileMaker fm(fname.c_str(), (lli)std::pow(1024, 2));
     fm.setFormatType(EXFAT);
