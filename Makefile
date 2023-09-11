@@ -18,7 +18,7 @@ WARNINGS := -Wall -Wextra -Wswitch-enum -Wstack-protector -Wdate-time -Walloc-ze
 WARNINGS_NO := -Wno-shadow -Wno-unused-parameter
 IF_WINDOWS := -fno-stack-protector
 CXXFLAGS := -std=c++17 -pedantic-errors -fPIC $(WARNINGS) $(WARNINGS_NO)
-LDFLAGS  := -lstdc++ -lm -lboost_program_options
+LDFLAGS  := -lstdc++ -lm -lboost_program_options -lboost_system
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)/objects
 APP_DIR  := $(BUILD)/apps

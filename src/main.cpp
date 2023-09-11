@@ -7,6 +7,8 @@
 #include <string>
 #include <iterator>
 
+#include <boost/algorithm/string.hpp>
+
 po::options_description Main::desc("Cramped usage");
 po::variables_map Main::vm;
 
@@ -41,20 +43,33 @@ int main(int argc, char *argv[]) {
   }
 
   //get the size
-  uint64_t size = std::pow(1024, 2);
+  lli size = -1;
   //std::string size_str;
   if (Main::vm.count("size")){
-    //size_str = Main::vm["size"].as<std::string>();
+    std::string size_str = Main::vm["size"].as<std::string>();
+
+    boost::trim(size_str);
+    
     printf("entered %s for size\n", Main::vm["size"].as<std::string>().c_str());
+    size = Main::sizeStrToInt(size_str);
   }
 
+  
+
+  if( size == -1){
+    printf("size defaulting to 1M\n");
+    size = std::pow(1024, 2);
+  }
+
+  printf("size is %lld\n", size);
+
   if(create){
-    FileMaker fm(fname.c_str(), (lli)std::pow(1024, 2));
+    FileMaker fm(fname.c_str(), size);
     fm.setFormatType(EXFAT);
     fm.makeFile();
     fm.formatFile(EXFAT);
   }else if(mount){
-    FileMaker fm(fname.c_str(), (lli)std::pow(1024, 2));
+    FileMaker fm(fname.c_str(), size);
     fm.setFormatType(FAT12);
     Mount::mountFile(fm.readFormat(), directory);
   }else if(disconnect){
@@ -105,3 +120,49 @@ void Main::map_variables(int argc, char **argv) {
 Format_e Main::format_from_string(std::string fmt){
     return UNKNOWN;
   }
+
+/**
+ * @brief string to integer
+ * 
+ * @param size 
+ * @return uint64_t 
+ */
+lli Main::sizeStrToInt(std::string const & size){
+
+  if( size.length() < 2 ){
+    //someting is wrong
+    return -1;
+  }
+
+  char letter = size.c_str()[size.length()-1];
+
+  printf("letter is %c\n", letter);
+
+  printf("size: %s\n",size.substr(0,size.length()-1).c_str());
+
+  lli size_int = std::stoll(size.substr(0,size.length()-1));
+
+  switch(letter){
+    case 'B':
+      break;
+    case 'K':
+      size_int *= 1024;
+      break;
+    case 'M':
+      size_int *= pow(1024,2);
+      break;
+    case 'G':
+      size_int *= pow(1024,3);
+      break;
+    default:
+      return -1;
+  }
+
+  printf("size is now %lld\n", size_int);
+
+  return size_int;
+  
+
+}
+
+

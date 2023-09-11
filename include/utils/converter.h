@@ -12,7 +12,6 @@ public:
                             long long size_in_bytes);
   static std::string getHex(unsigned char *arr, long long length,
                             long long cuts = 512);
-
 private:
 };
 

@@ -32,3 +32,4 @@ std::string getHex(unsigned char *arr, long long length, long long cuts = 512) {
   ss << std::endl;
   return ss.str();
 }
+
