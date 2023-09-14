@@ -12,7 +12,7 @@
 class FileMaker {
 public:
   FileMaker(const char *fname, lli size) {
-    this->fname = new char[strlen(fname)];
+    this->fname = new char[strlen(fname) + 1];
     this->fname = strcpy(this->fname, fname);
 
     this->size = size;

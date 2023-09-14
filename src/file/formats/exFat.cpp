@@ -33,6 +33,8 @@ void ExFat::writeBS(){
   //jumpboot
   file.write(data,3);
 
+  delete[] data;
+
   //filesystemname
   file.write(this->fsName.c_str(), 8);
 
@@ -141,7 +143,7 @@ void ExFat::writeOEMP(){
   std::fstream file;
   file.open(fname);
   file.seekp(OEMP_START);
-  //guid 1
+  //guid 1  
   unsigned char *buf = new unsigned char[4];
   
   //print guid
@@ -160,6 +162,8 @@ void ExFat::writeOEMP(){
   file.write(reinterpret_cast<const char*>(buf),4);
 
   file.seekg(32);
+
+  delete[] buf;
 
 };
 

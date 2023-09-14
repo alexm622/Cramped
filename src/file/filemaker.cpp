@@ -45,20 +45,21 @@ void FileMaker::makeFile() {
 }
 
 //format the file
-void FileMaker::formatFile(Format_e f) {
-  this->f = new Format(fname, size, f);
-  switch (f) {
+void FileMaker::formatFile(Format_e f_e) {
+  switch (f_e) {
   case FAT12:
     this->f = new Fat12(fname, size);
     this->f->format();
     break;
   case EXFAT:
+    //TODO: losing a lot of bytes right here, this should be fixed
     this->f = new ExFat(fname, size);
     this->f->format();
     break;
   case EXT2:
-    this->f = new Ext2(fname, size);
-    this->f->format();
+    printf("ext2 is not yet implemented\n");
+    /*this->f = new Ext2(fname, size);
+    this->f->format();*/
     break;
   case EXT4:
     printf("ext4 is not yet implemented\n");

@@ -40,11 +40,13 @@ int main(int argc, char *argv[]) {
     disconnect_str = Main::vm["disconnect"].as<std::string>();
   }
   if (Main::vm.count("format")){
+    printf("not yet implemented\n");
+    exit(0);
   }
 
   //get the size
   lli size = -1;
-  //std::string size_str;
+  
   if (Main::vm.count("size")){
     std::string size_str = Main::vm["size"].as<std::string>();
 

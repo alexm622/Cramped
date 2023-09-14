@@ -10,6 +10,7 @@
 
 class ExFat : public Format{
   public:
+  //TODO: lets try rewriting/expanding this to get a better understanding of memory leak
   ExFat(char *fname, lli size) 
     :Format(fname, size, EXFAT), fname(fname), size(size){};
   void format();

@@ -12,7 +12,7 @@ class Format {
 public:
   Format(char *fname, lli size, Format_e f) : size(size), f(f) {
     this->fname =
-        reinterpret_cast<char *>(malloc(sizeof(char) * strlen(fname)));
+        new char[strlen(fname) + 1];
     strcpy(this->fname, fname);
   }
   virtual ~Format(){};
