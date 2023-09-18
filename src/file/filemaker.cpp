@@ -55,6 +55,7 @@ void FileMaker::formatFile(Format_e f_e) {
     //TODO: losing a lot of bytes right here, this should be fixed
     this->f = new ExFat(fname, size);
     this->f->format();
+    delete this->f;    
     break;
   case EXT2:
     printf("ext2 is not yet implemented\n");

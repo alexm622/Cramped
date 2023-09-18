@@ -11,15 +11,15 @@
 class ExFat : public Format{
   public:
   //TODO: lets try rewriting/expanding this to get a better understanding of memory leak
-  ExFat(char *fname, lli size) 
-    :Format(fname, size, EXFAT), fname(fname), size(size){};
-  void format();
+  ExFat(char *fname, lli size) : Format(fname, size, EXFAT){};
+  ~ExFat(){};
+  void format() override;
   void writeBS();
   void writeEBS();
   void writeOEMP();
   void writeRS();
   void writeBC();
-  Format_e getFormat(){return UNKNOWN;};
+  Format_e getFormat() const{return EXFAT;};
 
 private:
   char *fname;

@@ -70,6 +70,7 @@ int main(int argc, char *argv[]) {
     fm.setFormatType(EXFAT);
     fm.makeFile();
     fm.formatFile(EXFAT);
+    
   }else if(mount){
     FileMaker fm(fname.c_str(), size);
     fm.setFormatType(FAT12);

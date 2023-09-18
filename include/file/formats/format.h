@@ -11,11 +11,13 @@ enum Format_e { UNKNOWN, FAT12, EXFAT, EXT2, EXT4, XFS };
 class Format {
 public:
   Format(char *fname, lli size, Format_e f) : size(size), f(f) {
-    this->fname =
-        new char[strlen(fname) + 1];
+    this->fname = new char[strlen(fname) + 1];
     strcpy(this->fname, fname);
+    
   }
-  virtual ~Format(){};
+  virtual ~Format(){
+    delete[] fname;
+  };
   virtual void format(){};
 
   void setSize(lli size) { this->size = size; };
