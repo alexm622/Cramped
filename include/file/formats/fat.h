@@ -7,11 +7,17 @@ class Fat : public Format {
 public:
   Fat(char *fname, lli size, Format_e f)
       : Format(fname, size, f), fname(fname), size(size), f(f){};
-  virtual void format() override;
+  void format() override;
 
-  virtual void writeBPB(){};
-  virtual void writeExBR(){};
-  virtual void writeExtras(){};
+  virtual void writeBPB(){
+    /*write bpb*/
+  };
+  virtual void writeExBR(){
+    /*write exbr*/
+  };
+  virtual void writeExtras(){
+    /*write extras*/
+  };
   virtual Format_e getFatType() { return UNKNOWN; };
 
 private:

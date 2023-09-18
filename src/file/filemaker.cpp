@@ -51,6 +51,9 @@ void FileMaker::formatFile(Format_e f_e) {
     this->f = new Fat12(fname, size);
     this->f->format();
     break;
+  case FAT32:
+    printf("fat32 is not yet implemented\n");
+    break;
   case EXFAT:
     //TODO: losing a lot of bytes right here, this should be fixed
     this->f = new ExFat(fname, size);
@@ -71,6 +74,9 @@ void FileMaker::formatFile(Format_e f_e) {
   case UNKNOWN:
     printf("invalid format\n");
 
+    return;
+  default:
+    printf("invalid format\n");
     return;
   }
 }

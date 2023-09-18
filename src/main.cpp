@@ -40,8 +40,8 @@ int main(int argc, char *argv[]) {
     disconnect_str = Main::vm["disconnect"].as<std::string>();
   }
   if (Main::vm.count("format")){
-    printf("not yet implemented\n");
-    exit(0);
+    std::string format_str = Main::vm["format"].as<std::string>();
+    format = Main::format_from_string(format_str);
   }
 
   //get the size
@@ -67,9 +67,9 @@ int main(int argc, char *argv[]) {
 
   if(create){
     FileMaker fm(fname.c_str(), size);
-    fm.setFormatType(EXFAT);
+    fm.setFormatType(format);
     fm.makeFile();
-    fm.formatFile(EXFAT);
+    fm.formatFile(format);
     
   }else if(mount){
     FileMaker fm(fname.c_str(), size);
@@ -120,7 +120,28 @@ void Main::map_variables(int argc, char **argv) {
   }
   
 }
+
+/**
+ * @brief turn a string into a format enum
+ * 
+ * @param fmt 
+ * @return Format_e 
+ */
 Format_e Main::format_from_string(std::string fmt){
+    boost::to_upper(fmt);
+    if(fmt == "FAT12"){
+      return FAT12;
+    }else if(fmt == "FAT32"){
+      return FAT32;
+    }else if(fmt == "EXFAT"){
+      return EXFAT;
+    }else if(fmt == "EXT2"){
+      return EXT2;
+    }else if(fmt == "EXT4"){
+      return EXT4;
+    }else if(fmt == "XFS"){
+      return XFS;
+    }
     return UNKNOWN;
   }
 
