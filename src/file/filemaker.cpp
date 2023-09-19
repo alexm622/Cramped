@@ -53,6 +53,7 @@ void FileMaker::formatFile(Format_e f_e)
   case FAT12:
     this->f = new Fat12(fname, size);
     this->f->format();
+    delete this->f;
     break;
   case FAT32:
     printf("fat32 is not yet implemented\n");
@@ -66,6 +67,7 @@ void FileMaker::formatFile(Format_e f_e)
     printf("ext2 is not yet implemented fully\n");
     this->f = new Ext2(fname, size);
     this->f->format();
+    delete this->f;
     break;
   case EXT4:
     printf("ext4 is not yet implemented\n");

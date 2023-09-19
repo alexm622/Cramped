@@ -11,7 +11,7 @@
 class ExFat : public Format
 {
 public:
-  ExFat(char *fname, lli size) : Format(fname, size, EXFAT){};
+  ExFat(char *fname, lli size) : Format(fname, size, EXT2), fname(fname), size(size){};
   ~ExFat(){};
   void format() override;
   void writeBS();
@@ -49,6 +49,14 @@ private:
 
   /// OEMP
   const int OEMP_START = EBS_START + EBS_SIZE + 0x04;
+
+  //flash parameters 
+
+  const char * OEM_ID = "0A0C7E463399402190C8FA6D389C4BA2";
+  const int OEM_ID_SIZE = 16;
+
+
+  
   // guid for the volume
   uint64_t guid_p1;
   uint64_t guid_p2;
@@ -59,6 +67,7 @@ private:
 
   // FAT_RS
   const int FAT_RS_START = 0x1e0 + pow(2, BYTES_PER_SECTOR_SHIFT) - 480;
+  const int MEDIA_DESCRIPTOR = 0xF8FFFFFF;
 };
 
 #endif

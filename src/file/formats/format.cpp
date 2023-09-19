@@ -8,6 +8,8 @@ std::string Format::fmtToStr(Format_e fmt)
     return "none";
   case (FAT12):
     return "vfat";
+  case (FAT32):
+    return "fat32";
   case (EXFAT):
     return "exfat";
   case (EXT2):

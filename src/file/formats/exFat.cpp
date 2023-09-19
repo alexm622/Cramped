@@ -40,6 +40,10 @@ void ExFat::format()
 
   printf("\n");
 
+  //clean up
+  delete[] b1;
+  delete[] b2;
+
   writeBS();
   writeEBS();
   writeOEMP();
@@ -51,6 +55,10 @@ void ExFat::writeBS()
 {
   printf("writing BS\n"); // initialization
   std::fstream file;
+
+  //print the name of the file
+  printf("fname: %s\n", fname);
+
   file.open(fname);
   file.seekp(0);
   auto *data = new char[3];
@@ -197,12 +205,36 @@ void ExFat::writeOEMP()
   delete[] b2;
 
   file.seekg(32);
+
 };
 
 // region structure
 // TODO write region structure
 void ExFat::writeRS(){
-    // not implemented
+  // not implemented
+  std::fstream file;
+  file.open(fname);
+
+  file.seekp(FAT_RS_START);
+
+  //buffer
+  auto buf = new unsigned char[4];
+
+  //media descriptor
+  Converter::IntToLittleEndianHex(buf, MEDIA_DESCRIPTOR);
+  file.write(reinterpret_cast<const char *>(buf), 4);
+
+  //write 4 bytes oxFF
+  buf[0] = buf[1] = buf[2] = buf[3] = 0xFF;
+  file.write(reinterpret_cast<const char *>(buf), 4);
+
+  //write 4 bytes of 0x00
+  buf[0] = buf[1] = buf[2] = buf[3] = 0x00;
+  file.write(reinterpret_cast<const char *>(buf), 4);
+
+  file.close();  
+
+  delete[] buf;
 };
 
 // TODO boot checksum
