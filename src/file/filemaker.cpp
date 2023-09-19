@@ -61,9 +61,9 @@ void FileMaker::formatFile(Format_e f_e) {
     delete this->f;    
     break;
   case EXT2:
-    printf("ext2 is not yet implemented\n");
-    /*this->f = new Ext2(fname, size);
-    this->f->format();*/
+    printf("ext2 is not yet implemented fully\n");
+    this->f = new Ext2(fname, size);
+    this->f->format();
     break;
   case EXT4:
     printf("ext4 is not yet implemented\n");

@@ -9,6 +9,8 @@ void Fat12::writeBPB() {
   std::fstream file;
   file.open(fname);
   file.seekp(0);
+
+  // 0x00 jump instruction
   char *data = new char[3];
   data[0] = (char)0xEB;
   data[1] = (char)0x3C;

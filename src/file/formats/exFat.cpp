@@ -7,8 +7,17 @@
 
 #include <inttypes.h>
 
+#include <random>
 
 void ExFat::format(){
+
+  //generate two random uint64_t's for the guid using c++11 random
+  std::random_device rd;
+  std::mt19937_64 gen(rd());
+  std::uniform_int_distribution<uint64_t> dis(0, UINT64_MAX);
+  guid_p1 = dis(gen);
+  guid_p2 = dis(gen);
+  
   writeBS();
   writeEBS();
   writeOEMP();
@@ -147,18 +156,18 @@ void ExFat::writeOEMP(){
   unsigned char *buf = new unsigned char[4];
   
   //print guid
-  printf("GUID: %#" PRIx64 "%" PRIx64 "\n",GUID_p1,GUID_p2);
+  printf("GUID: %#" PRIx64 "%" PRIx64 "\n",guid_p1,guid_p2);
 
   //part one
-  Converter::IntToLittleEndianHex(buf, GUID_p1>>32);
+  Converter::IntToLittleEndianHex(buf, guid_p1>>32);
   file.write(reinterpret_cast<const char*>(buf),4);
-  Converter::IntToLittleEndianHex(buf, GUID_p1);
+  Converter::IntToLittleEndianHex(buf, guid_p1);
   file.write(reinterpret_cast<const char*>(buf),4);
 
   //part 2
-  Converter::IntToLittleEndianHex(buf, GUID_p2>>32);
+  Converter::IntToLittleEndianHex(buf, guid_p2>>32);
   file.write(reinterpret_cast<const char*>(buf),4);
-  Converter::IntToLittleEndianHex(buf, GUID_p2);
+  Converter::IntToLittleEndianHex(buf, guid_p2);
   file.write(reinterpret_cast<const char*>(buf),4);
 
   file.seekg(32);

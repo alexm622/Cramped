@@ -50,9 +50,9 @@ private:
 
   ///OEMP
   const int OEMP_START = EBS_START + EBS_SIZE + 0x04;
-  const uint64_t EPOCH = std::chrono::system_clock::now().time_since_epoch().count();
-  const uint64_t GUID_p1 = (uint64_t) EPOCH - 272431 * 37 / 8 - (EPOCH % 2843);
-  const uint64_t GUID_p2 = GUID_p1 + (uint64_t) pow(215234, 2) / 3 - (uint64_t) sqrt(EPOCH);
+  //guid for the volume
+    uint64_t guid_p1;
+    uint64_t guid_p2;
   const int OEMP_SECTION_SIZE = 48;
   
   const uint64_t FLASH_p1 = 0x0A0C7E4633994021;
