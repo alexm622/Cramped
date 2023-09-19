@@ -12,6 +12,8 @@ public:
                             long long size_in_bytes);
   static std::string getHex(unsigned char *arr, long long length,
                             long long cuts = 512);
+  static uint64_t u64ToLittleEndian(uint64_t num);
+  static void u64ToLittleEndianHex(unsigned char *buf, uint64_t num);
 private:
 };
 

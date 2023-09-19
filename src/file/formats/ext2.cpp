@@ -32,6 +32,29 @@ void Ext2::calculate(){
   guid_p1 = dis(gen);
   guid_p2 = dis(gen);
 
+  //print the guid as it will be written to the disk
+  unsigned char* b1 = new unsigned char[8];
+  unsigned char* b2 = new unsigned char[8];
+
+  Converter::u64ToLittleEndianHex(b1,guid_p1);
+  Converter::u64ToLittleEndianHex(b2,guid_p2);
+
+  printf("guid: ");
+
+  for(int i = 0; i < 8; i++){
+    printf("%02x",b1[i]);
+  }
+
+  for(int i = 0; i < 8; i++){
+    printf("%02x",b2[i]);
+  }
+
+  printf("\n");
+
+  
+
+  
+
 }
 
 /**
@@ -166,7 +189,7 @@ void Ext2::writeESB() {
   std::fstream file;
   file.open(fname);
   //seek forwards to the superblock then skip the basic superblock
-  file.seekp(1024 + 83);
+  file.seekp(1024 + 84);
 
   // 0x00 first non-reserved inode
   unsigned char *buf = new unsigned char[4];
@@ -194,20 +217,27 @@ void Ext2::writeESB() {
   file.write(reinterpret_cast<const char *>(buf), 4);
 
   // 0x14 uuid
-  //print guid
-  printf("GUID: %#" PRIx64 "%" PRIx64 "\n",guid_p1,guid_p2);
 
-  //part one
-  Converter::IntToLittleEndianHex(buf, guid_p1>>32);
-  file.write(reinterpret_cast<const char*>(buf),4);
-  Converter::IntToLittleEndianHex(buf, guid_p1);
-  file.write(reinterpret_cast<const char*>(buf),4);
+  //convert the guid to little endian hex and put into a buffer
+  unsigned char* b1 = new unsigned char[8];
+  unsigned char* b2 = new unsigned char[8];
 
-  //part 2
-  Converter::IntToLittleEndianHex(buf, guid_p2>>32);
-  file.write(reinterpret_cast<const char*>(buf),4);
-  Converter::IntToLittleEndianHex(buf, guid_p2);
-  file.write(reinterpret_cast<const char*>(buf),4);
+  Converter::u64ToLittleEndianHex(b1,guid_p1);
+  Converter::u64ToLittleEndianHex(b2,guid_p2);
+
+  //write the guid
+  for(int i = 0; i < 8; i++){
+    file.write(reinterpret_cast<const char*>(&b1[i]),1);
+  }
+
+  for(int i = 0; i < 8; i++){
+    file.write(reinterpret_cast<const char*>(&b2[i]),1);
+  }
+
+  //we dont need these anymore
+  delete[] b1;
+  delete[] b2;
+  
 
   // 0x24 volume name
   std::string volName = "EXT2";
