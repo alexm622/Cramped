@@ -9,9 +9,11 @@
 
 #include "file/formats/format.h"
 
-class FileMaker {
+class FileMaker
+{
 public:
-  FileMaker(const char *fname, lli size) {
+  FileMaker(const char *fname, lli size)
+  {
     this->fname = new char[strlen(fname) + 1];
     this->fname = strcpy(this->fname, fname);
 
@@ -32,9 +34,12 @@ private:
   Format_e fmt = UNKNOWN;
   Format *f;
 
-  void writeBlock(std::ofstream &file, std::vector<char> &vec, lli num) {
-    for (int i = 0; i < num; i++) {
-      if (!file.write(&vec[0], vec.size())) {
+  void writeBlock(std::ofstream &file, std::vector<char> &vec, lli num)
+  {
+    for (int i = 0; i < num; i++)
+    {
+      if (!file.write(&vec[0], vec.size()))
+      {
         std::cerr << "failed to write file" << std::endl;
         exit(255);
       }

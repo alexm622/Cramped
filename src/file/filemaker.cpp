@@ -7,7 +7,8 @@
 #include "file/formats/ext2.h"
 #include "file/formats/format.h"
 
-void FileMaker::makeFile() {
+void FileMaker::makeFile()
+{
   std::ofstream file(fname, std::ios::binary | std::ios::out);
   // write file in size bytes
 
@@ -44,9 +45,11 @@ void FileMaker::makeFile() {
   writeBlock(file, empty, byte_num);
 }
 
-//format the file
-void FileMaker::formatFile(Format_e f_e) {
-  switch (f_e) {
+// format the file
+void FileMaker::formatFile(Format_e f_e)
+{
+  switch (f_e)
+  {
   case FAT12:
     this->f = new Fat12(fname, size);
     this->f->format();
@@ -55,10 +58,9 @@ void FileMaker::formatFile(Format_e f_e) {
     printf("fat32 is not yet implemented\n");
     break;
   case EXFAT:
-    //TODO: losing a lot of bytes right here, this should be fixed
     this->f = new ExFat(fname, size);
     this->f->format();
-    delete this->f;    
+    delete this->f;
     break;
   case EXT2:
     printf("ext2 is not yet implemented fully\n");
@@ -81,7 +83,8 @@ void FileMaker::formatFile(Format_e f_e) {
   }
 }
 
-Format FileMaker::readFormat() {
+Format FileMaker::readFormat()
+{
   this->f = new Format(fname, size, fmt);
   return *this->f;
 }

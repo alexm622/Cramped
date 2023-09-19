@@ -6,12 +6,15 @@
 #include <linux/loop.h>
 #include <vector>
 
-#define errExit(msg)                                                           \
-  do {                                                                         \
-    perror(msg);                                                               \
-    exit(EXIT_FAILURE);                                                        \
+#define errExit(msg)    \
+  do                    \
+  {                     \
+    perror(msg);        \
+    exit(EXIT_FAILURE); \
   } while (0)
-class Mount {
+
+class Mount
+{
 public:
   static bool mountFile(Format f, std::string destination);
   static std::string fdToFPath(unsigned long fd);

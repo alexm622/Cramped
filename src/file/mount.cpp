@@ -8,8 +8,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-bool Mount::mountFile(Format f, std::string destination) {
-  if (f.getFormat() == UNKNOWN) {
+bool Mount::mountFile(Format f, std::string destination)
+{
+  if (f.getFormat() == UNKNOWN)
+  {
     printf("cannot mount, there is no filesystem\n");
     return false;
   }
@@ -34,15 +36,18 @@ bool Mount::mountFile(Format f, std::string destination) {
       mount(f.getLoopDevice().c_str(), dest.c_str(),
             reinterpret_cast<const char *>(f.getFormatStr().c_str()), 0, opts);
   delete[] opts;
-  if (ret != 0) {
+  if (ret != 0)
+  {
     interpretError(ret, destination, f);
     return false;
   }
 
   return true;
 }
-void Mount::interpretError(int err, std::string path, Format f) {
-  switch (errno) {
+void Mount::interpretError(int err, std::string path, Format f)
+{
+  switch (errno)
+  {
   case (EACCES):
     printf("EACCES error\n");
     break;
@@ -93,7 +98,8 @@ void Mount::interpretError(int err, std::string path, Format f) {
   }
 }
 
-std::string Mount::createLoop(Format f) {
+std::string Mount::createLoop(Format f)
+{
   int loopctlfd, loopfd, backingfile;
   long devnr;
   char loopname[4096];
@@ -125,8 +131,9 @@ std::string Mount::createLoop(Format f) {
   std::string loopname_str = loopname;
   return loopname_str;
 }
-//remove an already existing loop device
-void Mount::removeRedundantLoop(Format f) {
+// remove an already existing loop device
+void Mount::removeRedundantLoop(Format f)
+{
   std::vector<std::pair<int, std::string>> loops = getLoops();
   std::filesystem::path path = f.getFname();
   int parent = open(path.c_str(), O_RDWR);
@@ -134,20 +141,24 @@ void Mount::removeRedundantLoop(Format f) {
   fstat(parent, &file_stat);
   unsigned long inode = file_stat.st_ino;
   close(parent);
-  for (std::pair<int, std::string> p : loops) {
+  for (std::pair<int, std::string> p : loops)
+  {
     int loopfd = open(p.second.c_str(), O_RDWR);
-    if (loopfd == -1) {
+    if (loopfd == -1)
+    {
       printf("%s failed\n", p.second.c_str());
       continue;
     }
     loop_info li = getLoopInfo(loopfd);
     printf("lo #%d name: %s, fd: %lu \n", li.lo_number, li.lo_name,
            li.lo_inode);
-    if (li.lo_inode == inode) {
+    if (li.lo_inode == inode)
+    {
       char *fname = new char[64];
       sprintf(fname, "/dev/loop%d", li.lo_number);
       int r = ioctl(loopfd, LOOP_CLR_FD, li.lo_number);
-      if (r == -1) {
+      if (r == -1)
+      {
         printf("loop%d busy\n", li.lo_number);
       }
       delete[] fname;
@@ -155,13 +166,15 @@ void Mount::removeRedundantLoop(Format f) {
     }
   }
 }
-//get list of all mounted loop devices
-//return value is a vector of (loopnum, path)
-std::vector<std::pair<int, std::string>> Mount::getLoops() {
+// get list of all mounted loop devices
+// return value is a vector of (loopnum, path)
+std::vector<std::pair<int, std::string>> Mount::getLoops()
+{
   std::vector<std::pair<int, std::string>> loops;
 
   std::vector<std::string> files;
-  for (const auto &entry : std::filesystem::directory_iterator("/dev/")) {
+  for (const auto &entry : std::filesystem::directory_iterator("/dev/"))
+  {
     // printf("got entry: %s\n", entry.path().c_str());
     files.push_back(entry.path());
   }
@@ -171,13 +184,15 @@ std::vector<std::pair<int, std::string>> Mount::getLoops() {
   std::fstream fs;
   fs.open("/proc/partitions", std::ios::in);
   std::vector<std::string> currloops;
-  while (fs) {
+  while (fs)
+  {
     std::string device;
     std::getline(fs, device);
     std::regex partitions("loop[0-9]{1,}");
     std::smatch m;
     std::regex_search(device, m, partitions);
-    if (m.empty()) {
+    if (m.empty())
+    {
       continue;
     }
     device = m[0];
@@ -185,9 +200,11 @@ std::vector<std::pair<int, std::string>> Mount::getLoops() {
     currloops.push_back(device);
   }
   fs.close();
-  for (std::string s : files) {
+  for (std::string s : files)
+  {
 
-    if (std::regex_match(s, loop)) {
+    if (std::regex_match(s, loop))
+    {
       // printf("found loop %s\n", s.c_str());
       int number;
       std::string name = s;
@@ -196,7 +213,8 @@ std::vector<std::pair<int, std::string>> Mount::getLoops() {
 
       number = std::stoi(s);
 
-      if (std::count(currloops.begin(), currloops.end(), s)) {
+      if (std::count(currloops.begin(), currloops.end(), s))
+      {
         std::pair<int, std::string> pair(number, name);
         loops.push_back(pair);
       }
@@ -206,11 +224,10 @@ std::vector<std::pair<int, std::string>> Mount::getLoops() {
   return loops;
 }
 
-loop_info Mount::getLoopInfo(int fd) {
+loop_info Mount::getLoopInfo(int fd)
+{
   loop_info li;
   ioctl(fd, LOOP_GET_STATUS, &li);
 
   return li;
 }
-
-

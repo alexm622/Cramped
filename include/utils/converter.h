@@ -5,7 +5,8 @@
 #include <ios>
 #include <iostream>
 #include <string>
-class Converter {
+class Converter
+{
 public:
   static void IntToLittleEndianHex(unsigned char *buff, long long num);
   static long long hexToInt(unsigned char *sector, long long offset,
@@ -14,6 +15,7 @@ public:
                             long long cuts = 512);
   static uint64_t u64ToLittleEndian(uint64_t num);
   static void u64ToLittleEndianHex(unsigned char *buf, uint64_t num);
+
 private:
 };
 
