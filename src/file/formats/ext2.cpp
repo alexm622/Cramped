@@ -294,5 +294,46 @@ void Ext2::writeESB()
  */
 void Ext2::writeBGDT()
 {
-  // not implemented
+  std::fstream file;
+  file.open(fname);
+
+  // seek forwards to the block group descriptor table
+  file.seekp(1024 + 1024);
+
+  // 0x00 block bitmap block
+  auto *buf = new unsigned char[4];
+  Converter::IntToLittleEndianHex(buf, 2);
+  file.write(reinterpret_cast<const char *>(buf), 4);
+
+  // 0x04 inode bitmap block
+  Converter::IntToLittleEndianHex(buf, 3);
+  file.write(reinterpret_cast<const char *>(buf), 4);
+
+  // 0x08 inode table block
+  Converter::IntToLittleEndianHex(buf, 4);
+  file.write(reinterpret_cast<const char *>(buf), 4);
+
+  // 0x0C free blocks count
+  Converter::IntToLittleEndianHex(buf, freeBlocks);
+  file.write(reinterpret_cast<const char *>(buf), 2);
+
+  // 0x0E free inodes count
+  Converter::IntToLittleEndianHex(buf, freeInodes);
+  file.write(reinterpret_cast<const char *>(buf), 2);
+
+  // 0x10 used directory count
+  Converter::IntToLittleEndianHex(buf, 0);
+  file.write(reinterpret_cast<const char *>(buf), 2);
+
+  // 0x12 pad
+  Converter::IntToLittleEndianHex(buf, 0);
+  file.write(reinterpret_cast<const char *>(buf), 2);
+
+  // 0x14 reserved
+  Converter::IntToLittleEndianHex(buf, 0);
+  file.write(reinterpret_cast<const char *>(buf), 12);
+
+  // done with block group descriptor table
+  file.close();
+  delete[] buf;
 }
