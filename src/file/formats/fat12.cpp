@@ -4,7 +4,10 @@
 
 #include <fstream>
 #include <ios>
-// write bios parameter block
+/**
+ * @brief write the boot sector
+ * 
+ */
 void Fat12::writeBPB()
 {
   std::fstream file;
@@ -89,6 +92,10 @@ void Fat12::writeBPB()
   delete[] buf;
 }
 
+/**
+ * @brief write extended bios parameter block
+ * 
+ */
 void Fat12::writeExBR()
 {
   std::fstream file;
@@ -129,6 +136,10 @@ void Fat12::writeExBR()
   return;
 }
 
+/**
+ * @brief write any extra data
+ * 
+ */
 void Fat12::writeExtras() { return; }
 
 Format_e Fat12::getFatType() { return FAT12; }

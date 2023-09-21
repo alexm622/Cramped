@@ -16,6 +16,10 @@ void Ext2::format()
   writeBGDT();
 }
 
+/**
+ * @brief calculate the number of blocks and inodes along with the guid
+ *
+ */
 void Ext2::calculate()
 {
   // calculate the number of blocks and inodes

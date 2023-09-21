@@ -64,7 +64,6 @@ void FileMaker::formatFile(Format_e f_e)
     delete this->f;
     break;
   case EXT2:
-    printf("ext2 is not yet implemented fully\n");
     this->f = new Ext2(fname, size);
     this->f->format();
     delete this->f;

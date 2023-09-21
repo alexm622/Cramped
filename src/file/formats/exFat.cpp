@@ -51,6 +51,10 @@ void ExFat::format()
   writeBC();
 }
 
+/**
+ * @brief write the boot sector
+ * 
+ */
 void ExFat::writeBS()
 {
   printf("writing BS\n"); // initialization
@@ -156,6 +160,10 @@ void ExFat::writeBS()
   delete[] buf;
 }
 
+/**
+ * @brief write the extended boot sector
+ * 
+ */
 void ExFat::writeEBS()
 {
   printf("writings extended boot sector\n");
@@ -175,6 +183,11 @@ void ExFat::writeEBS()
   printf("done writing extended boot sector\n");
   delete[] buf;
 };
+
+/**
+ * @brief write the OEM parameters
+ * 
+ */
 void ExFat::writeOEMP()
 {
   std::fstream file;
@@ -209,9 +222,11 @@ void ExFat::writeOEMP()
 };
 
 // region structure
-// TODO write region structure
+/**
+ * @brief write the region structure
+ * 
+ */
 void ExFat::writeRS(){
-  // not implemented
   std::fstream file;
   file.open(fname);
 
@@ -237,11 +252,34 @@ void ExFat::writeRS(){
   delete[] buf;
 };
 
-// TODO boot checksum
+/**
+ * @brief calculate and write the boot checksum
+ * 
+ */
 void ExFat::writeBC()
 {
   // boot checksum
   uint32_t NumberOfBytes = (uint32_t)BYTES_PER_SECTOR * 11;
   uint32_t Checksum = 0;
   uint32_t Index;
+
+  std::fstream file;
+  file.open(fname);
+
+  file.seekp(0);
+
+  for (Index = 0; Index < NumberOfBytes; Index++)
+  {
+    Checksum = ((Checksum & 1) ? 0x80000000 : 0) + (Checksum >> 1) + file.get();
+  }
+
+  Checksum = (Checksum & 1) ? 0x80000000 : 0 + (Checksum >> 1);
+
+  file.seekp(0x1fe);
+  auto buf = new unsigned char[4];
+  Converter::IntToLittleEndianHex(buf, Checksum);
+  file.write(reinterpret_cast<const char *>(buf), 4);
+
+  file.close();
+  delete[] buf;
 };

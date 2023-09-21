@@ -8,6 +8,14 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+/**
+ * @brief mount a file to a destination
+ * 
+ * @param f the file to mount
+ * @param destination the destination to mount to
+ * @return true if successful
+ * @return false if unsuccessful
+ */
 bool Mount::mountFile(Format f, std::string destination)
 {
   if (f.getFormat() == UNKNOWN)
@@ -44,6 +52,13 @@ bool Mount::mountFile(Format f, std::string destination)
 
   return true;
 }
+/**
+ * @brief intepret error code from mount
+ * 
+ * @param err error
+ * @param path path to mount to
+ * @param f format of file
+ */
 void Mount::interpretError(int err, std::string path, Format f)
 {
   switch (errno)
@@ -98,6 +113,12 @@ void Mount::interpretError(int err, std::string path, Format f)
   }
 }
 
+/**
+ * @brief create a loop device for the file
+ * 
+ * @param f the file to create a loop device for
+ * @return std::string the name of the loop device
+ */
 std::string Mount::createLoop(Format f)
 {
   int loopctlfd, loopfd, backingfile;
@@ -131,7 +152,11 @@ std::string Mount::createLoop(Format f)
   std::string loopname_str = loopname;
   return loopname_str;
 }
-// remove an already existing loop device
+/**
+ * @brief remove a loop device if it is redundant
+ * 
+ * @param f file to check
+ */
 void Mount::removeRedundantLoop(Format f)
 {
   std::vector<std::pair<int, std::string>> loops = getLoops();
@@ -166,8 +191,11 @@ void Mount::removeRedundantLoop(Format f)
     }
   }
 }
-// get list of all mounted loop devices
-// return value is a vector of (loopnum, path)
+/**
+ * @brief get a list of all mounted loop devices
+ * 
+ * @return std::vector<std::pair<int, std::string>> list of loop devices
+ */
 std::vector<std::pair<int, std::string>> Mount::getLoops()
 {
   std::vector<std::pair<int, std::string>> loops;
@@ -224,6 +252,12 @@ std::vector<std::pair<int, std::string>> Mount::getLoops()
   return loops;
 }
 
+/**
+ * @brief get loop info from a file descriptor
+ * 
+ * @param fd file descriptor
+ * @return loop_info loop info
+ */
 loop_info Mount::getLoopInfo(int fd)
 {
   loop_info li;

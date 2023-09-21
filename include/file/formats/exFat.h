@@ -67,7 +67,7 @@ private:
 
   // FAT_RS
   const int FAT_RS_START = 0x1e0 + pow(2, BYTES_PER_SECTOR_SHIFT) - 480;
-  const int MEDIA_DESCRIPTOR = 0xF8FFFFFF;
+  const int MEDIA_DESCRIPTOR = 0xF8FFFFFF ;
 };
 
 #endif
