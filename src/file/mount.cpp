@@ -32,12 +32,12 @@ bool Mount::mountFile(Format f, std::string destination)
   if (fd == -1)
   {
     printf("could not open file\n");
+    delete[] pname;  
     return false;
   }
   f.setFd(fd);
   delete[] pname;
   // create loop device
-  // TODO: this is throwing double free or corruption
   std::string loopname = createLoop(f.getFd());
   f.setLoopDevice(loopname);
   std::filesystem::path dest = destination;
@@ -49,7 +49,7 @@ bool Mount::mountFile(Format f, std::string destination)
   fstat(destfd, &file_stat);
   int uid = file_stat.st_uid;
   int gid = file_stat.st_gid;
-  char* opts = new char[512];
+  auto opts = new char[512];
 
   //get opts
   setOpts(opts, f.getFormat(), gid, uid);
@@ -203,7 +203,7 @@ void Mount::removeRedundantLoop(Format f)
            li.lo_inode);
     if (li.lo_inode == inode)
     {
-      char *fname = new char[64];
+      auto fname = new char[64];
       sprintf(fname, "/dev/loop%d", li.lo_number);
 
       int r = ioctl(loopfd, LOOP_CLR_FD, li.lo_number);
@@ -233,12 +233,13 @@ bool Mount::disconnectFile(Format f)
 bool Mount::disconnectFile(int fd)
 {
   loop_info li = getLoopInfo(fd);
-  char *fname = new char[64];
+  auto fname = new char[64];
   sprintf(fname, "/dev/loop%d", li.lo_number);
   int r = ioctl(fd, LOOP_CLR_FD, li.lo_number);
   if (r == -1)
   {
     printf("loop%d busy\n", li.lo_number);
+    delete[] fname;
     return false;
   }
   delete[] fname;
@@ -258,7 +259,6 @@ std::vector<std::pair<int, std::string>> Mount::getLoops()
   std::vector<std::string> files;
   for (const auto &entry : std::filesystem::directory_iterator("/dev/"))
   {
-    // printf("got entry: %s\n", entry.path().c_str());
     files.push_back(entry.path());
   }
 
