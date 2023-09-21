@@ -12,14 +12,18 @@
 class FileMaker
 {
 public:
-  FileMaker(const char *fname, lli size)
+  FileMaker(const char *fname, lli size): size(size)
   {
     this->fname = new char[strlen(fname) + 1];
     this->fname = strcpy(this->fname, fname);
 
-    this->size = size;
   };
-  ~FileMaker() { delete[] fname; };
+  ~FileMaker() {
+    delete[] fname;
+    if(f != nullptr){
+      delete f;
+    }
+  };
 
   void makeFile();
   void formatFile(Format_e f);
@@ -32,7 +36,7 @@ private:
   char *fname;
   lli size = 0;
   Format_e fmt = UNKNOWN;
-  Format *f;
+  Format *f = nullptr;
 
   void writeBlock(std::ofstream &file, std::vector<char> &vec, lli num)
   {

@@ -52,11 +52,16 @@ public:
     return this->loopDevice;
   };
 
+  //file discriptor
+  int getFd() { return fd; };
+  void setFd(int fd) { this->fd = fd; };
+
 private:
   lli size;
   char *fname;
   Format_e f;
   std::string loopDevice;
+  int fd;
 };
 
 #endif

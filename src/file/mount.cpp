@@ -8,9 +8,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+
 /**
  * @brief mount a file to a destination
- * 
+ *
  * @param f the file to mount
  * @param destination the destination to mount to
  * @return true if successful
@@ -23,7 +24,21 @@ bool Mount::mountFile(Format f, std::string destination)
     printf("cannot mount, there is no filesystem\n");
     return false;
   }
-  std::string loopname = createLoop(f);
+  // get file discriptor
+  char *pname = new char[strlen(f.getFname()) + 1];
+  strcpy(pname, f.getFname());
+  //this should free pname in the process
+  int fd = open(pname, O_RDWR);
+  if (fd == -1)
+  {
+    printf("could not open file\n");
+    return false;
+  }
+  f.setFd(fd);
+  delete[] pname;
+  // create loop device
+  // TODO: this is throwing double free or corruption
+  std::string loopname = createLoop(f.getFd());
   f.setLoopDevice(loopname);
   std::filesystem::path dest = destination;
   dest = std::filesystem::absolute(dest);
@@ -34,19 +49,30 @@ bool Mount::mountFile(Format f, std::string destination)
   fstat(destfd, &file_stat);
   int uid = file_stat.st_uid;
   int gid = file_stat.st_gid;
-  char *opts = new char[64];
-  sprintf(opts, "uid=%d,gid=%d,umask=0750,fmask=0750,dmask=0750", uid, gid);
+  char* opts = new char[512];
+
+  //get opts
+  setOpts(opts, f.getFormat(), gid, uid);
+
+  // print opts
+  printf("opts: %s\n", opts);
 
   printf("attempting to mount %s at %s\n", f.getLoopDevice().c_str(),
          dest.c_str());
+  // print format
+  printf("format: %s\n", f.getFormatStr().c_str());
+  // print loopdevice
+  printf("loopdevice: %s\n", f.getLoopDevice().c_str());
 
   int ret =
       mount(f.getLoopDevice().c_str(), dest.c_str(),
-            reinterpret_cast<const char *>(f.getFormatStr().c_str()), 0, opts);
+            f.getFormatStr().c_str(), 0, opts);
+
   delete[] opts;
+
   if (ret != 0)
   {
-    interpretError(ret, destination, f);
+    interpretError(ret);
     return false;
   }
 
@@ -54,58 +80,59 @@ bool Mount::mountFile(Format f, std::string destination)
 }
 /**
  * @brief intepret error code from mount
- * 
+ *
  * @param err error
  * @param path path to mount to
  * @param f format of file
  */
-void Mount::interpretError(int err, std::string path, Format f)
+void Mount::interpretError(int err)
 {
   switch (errno)
   {
-  case (EACCES):
+  case EACCES:
     printf("EACCES error\n");
     break;
-  case (EBUSY):
+  case EBUSY:
     printf("EBUSY error\n");
     break;
-  case (EFAULT):
+  case EFAULT:
     printf("EFAULT error\n");
     break;
-  case (EINVAL):
+  case EINVAL:
     printf("EINVAL\n");
+    // print args
     break;
-  case (ELOOP):
+  case ELOOP:
     printf("ELOOP\n");
     break;
-  case (EMFILE):
+  case EMFILE:
     printf("table of dummy devices is full\n");
     break;
-  case (ENAMETOOLONG):
+  case ENAMETOOLONG:
     printf("name too long\n");
     break;
-  case (ENODEV):
+  case ENODEV:
     printf("filesystem not configured in the kernel\n");
     break;
-  case (ENOENT):
+  case ENOENT:
     printf("bad pathname\n");
     break;
-  case (ENOMEM):
+  case ENOMEM:
     printf("kernel could not allocate memory for mounting\n");
     break;
-  case (ENOTBLK):
+  case ENOTBLK:
     printf("source is not a block device\n");
     break;
-  case (ENOTDIR):
+  case ENOTDIR:
     printf("target is not a directory\n");
     break;
-  case (ENXIO):
+  case ENXIO:
     printf("the number of block device is out of range\n");
     break;
-  case (EPERM):
+  case EPERM:
     printf("insufficient permissions\n");
     break;
-  case (EROFS):
+  case EROFS:
     printf("this filesystem is read only\n");
     break;
   default:
@@ -115,18 +142,19 @@ void Mount::interpretError(int err, std::string path, Format f)
 
 /**
  * @brief create a loop device for the file
- * 
+ *
  * @param f the file to create a loop device for
  * @return std::string the name of the loop device
  */
-std::string Mount::createLoop(Format f)
+std::string Mount::createLoop(int fd)
 {
-  int loopctlfd, loopfd, backingfile;
+  int loopctlfd;
+  int loopfd;
+  int backingfile = fd;
   long devnr;
-  char loopname[4096];
 
-  removeRedundantLoop(f);
-  // TODO add autoclear flag to device
+  // removeRedundantLoop(f);
+  //  TODO add autoclear flag to device
 
   loopctlfd = open("/dev/loop-control", O_RDWR);
   if (loopctlfd == -1)
@@ -136,16 +164,11 @@ std::string Mount::createLoop(Format f)
   if (devnr == -1)
     errExit("ioctl-LOOP_CTL_GET_FREE");
 
-  sprintf(loopname, "/dev/loop%ld", devnr);
-  printf("loopname = %s\n", loopname);
+  std::string loopname = "/dev/loop" + std::to_string(devnr);
 
-  loopfd = open(loopname, O_RDWR);
+  loopfd = open(loopname.c_str(), O_RDWR);
   if (loopfd == -1)
     errExit("open: loopname");
-
-  backingfile = open(f.getFname(), O_RDWR);
-  if (backingfile == -1)
-    errExit("open: backing-file");
 
   if (ioctl(loopfd, LOOP_SET_FD, backingfile) == -1)
     errExit("ioctl-LOOP_SET_FD");
@@ -154,18 +177,19 @@ std::string Mount::createLoop(Format f)
 }
 /**
  * @brief remove a loop device if it is redundant
- * 
+ *
  * @param f file to check
  */
 void Mount::removeRedundantLoop(Format f)
 {
   std::vector<std::pair<int, std::string>> loops = getLoops();
-  std::filesystem::path path = f.getFname();
-  int parent = open(path.c_str(), O_RDWR);
+  auto pname = new char[strlen(f.getFname()) + 1];
+  strcpy(pname, f.getFname());
+  std::filesystem::path path = pname;
+  delete[] pname;
   struct stat file_stat;
-  fstat(parent, &file_stat);
+  fstat(f.getFd(), &file_stat);
   unsigned long inode = file_stat.st_ino;
-  close(parent);
   for (std::pair<int, std::string> p : loops)
   {
     int loopfd = open(p.second.c_str(), O_RDWR);
@@ -181,6 +205,7 @@ void Mount::removeRedundantLoop(Format f)
     {
       char *fname = new char[64];
       sprintf(fname, "/dev/loop%d", li.lo_number);
+
       int r = ioctl(loopfd, LOOP_CLR_FD, li.lo_number);
       if (r == -1)
       {
@@ -191,9 +216,39 @@ void Mount::removeRedundantLoop(Format f)
     }
   }
 }
+
+bool Mount::disconnectFile(Format f)
+{
+  int fd = open(f.getFname(), O_RDWR);
+  return disconnectFile(fd);
+}
+
+/**
+ * @brief disconnect a file from a loop device
+ *
+ * @param f the file to disconnect
+ * @return true if successful
+ * @return false if unsuccessful
+ */
+bool Mount::disconnectFile(int fd)
+{
+  loop_info li = getLoopInfo(fd);
+  char *fname = new char[64];
+  sprintf(fname, "/dev/loop%d", li.lo_number);
+  int r = ioctl(fd, LOOP_CLR_FD, li.lo_number);
+  if (r == -1)
+  {
+    printf("loop%d busy\n", li.lo_number);
+    return false;
+  }
+  delete[] fname;
+  close(fd);
+  return true;
+}
+
 /**
  * @brief get a list of all mounted loop devices
- * 
+ *
  * @return std::vector<std::pair<int, std::string>> list of loop devices
  */
 std::vector<std::pair<int, std::string>> Mount::getLoops()
@@ -254,7 +309,7 @@ std::vector<std::pair<int, std::string>> Mount::getLoops()
 
 /**
  * @brief get loop info from a file descriptor
- * 
+ *
  * @param fd file descriptor
  * @return loop_info loop info
  */
@@ -264,4 +319,36 @@ loop_info Mount::getLoopInfo(int fd)
   ioctl(fd, LOOP_GET_STATUS, &li);
 
   return li;
+}
+
+void Mount::setOpts(char* opts, Format_e f, int gid, int uid)
+{
+
+  switch (f)
+  {
+  case UNKNOWN:
+    break;
+  case FAT12: // this should be mounted as vfat
+    sprintf(opts,"uid=1000,gid=%d,umask=0750,fmask=0750,dmask=0750",gid);
+    break;
+  case FAT32:
+    sprintf(opts,"uid=1000,gid=%d,umask=0750,fmask=0750,dmask=0750",gid);
+    break;
+  case EXFAT:
+    sprintf(opts,"");
+    break;
+  case EXT2:
+    sprintf(opts,"");
+    break;
+  case EXT4:
+    sprintf(opts,"");
+    break;
+  case XFS:
+    sprintf(opts,"");
+    break;
+  default:
+    sprintf(opts,"");
+    break;
+  }
+
 }

@@ -86,6 +86,5 @@ void FileMaker::formatFile(Format_e f_e)
 
 Format FileMaker::readFormat()
 {
-  this->f = new Format(fname, size, fmt);
-  return *this->f;
+  return Format(fname, size, fmt);
 }

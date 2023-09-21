@@ -4,19 +4,17 @@ std::string Format::fmtToStr(Format_e fmt)
 {
   switch (fmt)
   {
-  case (UNKNOWN):
+  case UNKNOWN:
     return "none";
-  case (FAT12):
-    return "vfat";
-  case (FAT32):
-    return "fat32";
-  case (EXFAT):
+  case FAT12: case FAT32:
+    return "vfat"; 
+  case EXFAT:
     return "exfat";
-  case (EXT2):
+  case EXT2:
     return "ext2";
-  case (EXT4):
+  case EXT4:
     return "ext4";
-  case (XFS):
+  case XFS:
     return "xfs";
   default:
     return "none";

@@ -80,13 +80,14 @@ int main(int argc, char *argv[])
   else if (mount)
   {
     FileMaker fm(fname.c_str(), size);
-    fm.setFormatType(FAT12);
+    fm.setFormatType(format);
     Mount::mountFile(fm.readFormat(), directory);
   }
   else if (disconnect)
   {
-    printf("this is still a wip\n");
-    // this needs to be written eventually
+    FileMaker fm(disconnect_str.c_str(), size);
+    fm.setFormatType(format);
+    Mount::disconnectFile(fm.readFormat());
   }
 
   return 0;
