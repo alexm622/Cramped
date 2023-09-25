@@ -51,22 +51,19 @@ void FileMaker::formatFile(Format_e f_e)
   switch (f_e)
   {
   case FAT12:
-    this->f = new Fat12(fname, size);
+    this->f = new Fat12(strdup(fname), size);
     this->f->format();
-    delete this->f;
     break;
   case FAT32:
     printf("fat32 is not yet implemented\n");
     break;
   case EXFAT:
-    this->f = new ExFat(fname, size);
+    this->f = new ExFat(strdup(fname), size);
     this->f->format();
-    delete this->f;
     break;
   case EXT2:
-    this->f = new Ext2(fname, size);
+    this->f = new Ext2(strdup(fname), size);
     this->f->format();
-    delete this->f;
     break;
   case EXT4:
     printf("ext4 is not yet implemented\n");

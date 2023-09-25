@@ -15,8 +15,7 @@ public:
   FileMaker(const char *fname, lli size): size(size)
   {
     this->fname = new char[strlen(fname) + 1];
-    this->fname = strcpy(this->fname, fname);
-
+    strcpy(this->fname, fname);
   };
   ~FileMaker() {
     delete[] fname;
