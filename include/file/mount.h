@@ -22,7 +22,7 @@ public:
 
   //disconnecting specific functions
   static bool disconnectFile(Format f);
-  static bool disconnectFile(int fd);
+  static bool disconnectFile(int fd, std::string path);
   
 
 

@@ -15,6 +15,8 @@ po::variables_map Main::vm;
 static bool create = false;
 static bool mount = false;
 static bool disconnect = false;
+static bool directory_b = false;
+static bool format_b = false;
 
 int main(int argc, char *argv[])
 {
@@ -26,6 +28,14 @@ int main(int argc, char *argv[])
 
   std::string directory = "test_m/";
   Format_e format = UNKNOWN;
+
+  if (Main::vm.count("format"))
+  {
+    format_b = true;
+    std::string format_str = Main::vm["format"].as<std::string>();
+    format = Main::format_from_string(format_str);
+  }
+
   if (Main::vm.count("create"))
   {
     create = true;
@@ -34,8 +44,17 @@ int main(int argc, char *argv[])
 
   if (Main::vm.count("mount"))
   {
-    mount = true;
-    fname = Main::vm["mount"].as<std::string>();
+    //make sure there is a directory
+    if (Main::vm.count("directory") && format_b) {
+      directory_b = true;
+      mount = true;
+      fname = Main::vm["mount"].as<std::string>();
+      directory = Main::vm["directory"].as<std::string>();
+    }else{
+      printf("mount operation requires a directory destination (-D) for mounting and a format (-f) \n");
+      std::cout << Main::desc;
+      return 1;
+    }
   }
 
   if (Main::vm.count("disconnect"))
@@ -43,11 +62,7 @@ int main(int argc, char *argv[])
     disconnect = true;
     disconnect_str = Main::vm["disconnect"].as<std::string>();
   }
-  if (Main::vm.count("format"))
-  {
-    std::string format_str = Main::vm["format"].as<std::string>();
-    format = Main::format_from_string(format_str);
-  }
+
 
   // get the size
   lli size = -1;
@@ -105,7 +120,8 @@ void Main::add_arguments()
                      "the size of the mount\nappend the following characters to specify size increments (default: kilobytes)\n       B: bytes\n       K: kilobytes\n       M: megabytes\n       G: gigabytes");
   desc.add_options()("format,f", po::value<std::string>()->required()->value_name("format"), "the format of the mount (default: FAT12)\navailable formats:\n       FAT12\n       FAT32\n       exFat");
   desc.add_options()("mount,m", po::value<std::string>()->required()->value_name("file"),
-                     "mount a file");
+                     "mount a <file>, requires a directory to be specified");
+  desc.add_options()("directory,d", po::value<std::string>()->required()->value_name("directory"), "the directory to mount to");
   desc.add_options()("disconnect,D", po::value<std::string>()->required()->value_name("device"),
                      "disconnect device");
 }

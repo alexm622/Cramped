@@ -48,22 +48,13 @@ private:
   const int EBS_SIZE = pow(2, BYTES_PER_SECTOR_SHIFT) - 4;
 
   /// OEMP
-  const int OEMP_START = EBS_START + EBS_SIZE + 0x04;
-
-  //flash parameters 
-
-  const char * OEM_ID = "0A0C7E463399402190C8FA6D389C4BA2";
-  const int OEM_ID_SIZE = 16;
-
+  const int OEMP_START = EBS_START + EBS_SIZE + 0x04; 
 
   
   // guid for the volume
   uint64_t guid_p1;
   uint64_t guid_p2;
-  const int OEMP_SECTION_SIZE = 48;
 
-  const uint64_t FLASH_p1 = 0x0A0C7E4633994021;
-  const uint64_t FLASH_p2 = 0x90C8FA6D389C4BA2;
 
   // FAT_RS
   const int FAT_RS_START = 0x1e0 + pow(2, BYTES_PER_SECTOR_SHIFT) - 480;

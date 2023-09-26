@@ -220,7 +220,7 @@ void Mount::removeRedundantLoop(Format f)
 bool Mount::disconnectFile(Format f)
 {
   int fd = open(f.getFname(), O_RDWR);
-  return disconnectFile(fd);
+  return disconnectFile(fd, f.getFname());
 }
 
 /**
@@ -230,23 +230,48 @@ bool Mount::disconnectFile(Format f)
  * @return true if successful
  * @return false if unsuccessful
  */
-bool Mount::disconnectFile(int fd)
+bool Mount::disconnectFile(int fd, std::string path)
 {
-  loop_info li = getLoopInfo(fd);
-  auto fname = new char[64];
-  sprintf(fname, "/dev/loop%d", li.lo_number);
-  int r = ioctl(fd, LOOP_CLR_FD, li.lo_number);
-  if (r == -1)
+  //map file to loop device
+  std::vector<std::pair<int, std::string>> loops = getLoops();
+  struct stat file_stat;
+  fstat(fd, &file_stat);
+  unsigned long inode = file_stat.st_ino;
+
+  // find loop device
+
+  for (std::pair<int, std::string> p : loops)
   {
-    printf("loop%d busy\n", li.lo_number);
-    delete[] fname;
-    return false;
+    int loopfd = open(p.second.c_str(), O_RDWR);
+    if (loopfd == -1)
+    {
+      printf("%s failed\n", p.second.c_str());
+      continue;
+    }
+    loop_info li = getLoopInfo(loopfd);
+    printf("lo #%d name: %s, fd: %lu \n", li.lo_number, li.lo_name,
+           li.lo_inode);
+    if (li.lo_inode == inode)
+    {
+      printf("found loop device\n");
+      auto fname = new char[64];
+      sprintf(fname, "/dev/loop%d", li.lo_number);
+
+      //umount path
+      umount(path.c_str());
+      
+
+      int r = ioctl(loopfd,  LOOP_CTL_REMOVE, li.lo_number);
+      if (r == -1)
+      {
+        printf("loop%d busy\n", li.lo_number);
+      }
+      delete[] fname;
+      close(loopfd);
+    }
   }
-  delete[] fname;
-  close(fd);
   return true;
 }
-
 /**
  * @brief get a list of all mounted loop devices
  *
