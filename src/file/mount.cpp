@@ -7,6 +7,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <mntent.h>
+#include <string>
 
 
 /**
@@ -173,6 +175,7 @@ std::string Mount::createLoop(int fd)
   if (ioctl(loopfd, LOOP_SET_FD, backingfile) == -1)
     errExit("ioctl-LOOP_SET_FD");
   std::string loopname_str = loopname;
+  close(loopctlfd);
   return loopname_str;
 }
 /**
@@ -231,7 +234,7 @@ bool Mount::disconnectFile(Format f)
  * @return false if unsuccessful
  */
 bool Mount::disconnectFile(int fd, std::string path)
-{
+{ 
   //map file to loop device
   std::vector<std::pair<int, std::string>> loops = getLoops();
   struct stat file_stat;
@@ -242,7 +245,9 @@ bool Mount::disconnectFile(int fd, std::string path)
 
   for (std::pair<int, std::string> p : loops)
   {
-    int loopfd = open(p.second.c_str(), O_RDWR);
+    printf("checking %s\n", p.second.c_str());
+    auto loopfd = open(p.second.c_str(), O_RDONLY);
+    
     if (loopfd == -1)
     {
       printf("%s failed\n", p.second.c_str());
@@ -256,19 +261,65 @@ bool Mount::disconnectFile(int fd, std::string path)
       printf("found loop device\n");
       auto fname = new char[64];
       sprintf(fname, "/dev/loop%d", li.lo_number);
+      
+      //get path that loop device is mounted to by reading /proc/mounts
+      auto loopf = fopen("/proc/mounts", "r");
+      
+      //well use regex to find the mount point
+      std::regex loopdev(fname);
+      std::string umount_path = "";
+      
+      //use a for loop to read each line of the file
+      while (loopf)
+      {
+        char line[256];
+        fgets(line, 256, loopf);
+        std::string line_str = line;
+        std::smatch m;
+        //if the line matches the regex, then we have found the mount point
+        if (std::regex_search(line_str, m, loopdev))
+        {
+          //split the line by spaces
+          std::vector<std::string> split;
+          std::string token;
+          std::istringstream tokenStream(line_str);
+          while (std::getline(tokenStream, token, ' '))
+          {
+            split.push_back(token);
+          }
+          //the mount point is the second element
+          umount_path = split[1];
+          break;
+        }
+        //if we have reached the end of the file, then we have not found the mount point
+        if (feof(loopf))
+        {
+          printf("could not find mount point, clearing odd loop device\n");
+          break;
+        }
+      }
 
-      //umount path
-      umount(path.c_str());
+      //if mounted, unmount
+
+      if(!umount_path.empty()){
+        fclose(loopf);
+        printf("umount path: %s\n", umount_path.c_str());
+        //unmount
+        umount2(umount_path.c_str(), MNT_DETACH);
+      }
+
       
 
-      int r = ioctl(loopfd,  LOOP_CTL_REMOVE, li.lo_number);
+      //clear loop device
+      printf("clearing loop device\n");
+      int r = ioctl(loopfd, LOOP_CLR_FD, li.lo_number);
       if (r == -1)
       {
         printf("loop%d busy\n", li.lo_number);
       }
       delete[] fname;
-      close(loopfd);
     }
+    close(loopfd);
   }
   return true;
 }
