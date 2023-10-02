@@ -8,8 +8,9 @@
 #include <random>
 #include <vector>
 
-void Ext2::format()
-{
+#include <math.h>
+
+void Ext2::format() {
   calculate();
   writeBSB();
   writeESB();
@@ -20,11 +21,15 @@ void Ext2::format()
  * @brief calculate the number of blocks and inodes along with the guid
  *
  */
-void Ext2::calculate()
-{
+void Ext2::calculate() {
   // calculate the number of blocks and inodes
   numInodes = size / EXT2_INODE_SIZE;
-  numBlocks = size / EXT2_BLOCK_SIZE;
+  printf("inode count: %lld\n", numInodes);
+  numBlocks = size / EXT2_BLOCK_SIZE / 2;
+  printf("size: %lld\n", size);
+  printf("numblocks: %lld\n", numBlocks);
+
+  
 
   // calculate the number of free blocks and inodes
   freeInodes = numInodes;
@@ -46,17 +51,19 @@ void Ext2::calculate()
 
   printf("guid: ");
 
-  for (int i = 0; i < 8; i++)
-  {
+  for (int i = 0; i < 8; i++) {
     printf("%02x", b1[i]);
   }
 
-  for (int i = 0; i < 8; i++)
-  {
+  for (int i = 0; i < 8; i++) {
     printf("%02x", b2[i]);
   }
 
   printf("\n");
+
+
+  //calculate the block count
+  
 
   // clean up
   delete[] b1;
@@ -67,8 +74,7 @@ void Ext2::calculate()
  * @brief write basic superblock
  *
  */
-void Ext2::writeBSB()
-{
+void Ext2::writeBSB() {
   std::fstream file;
   file.open(fname);
 
@@ -77,11 +83,11 @@ void Ext2::writeBSB()
 
   // 0x00 total inodes
   auto *buf = new unsigned char[4];
-  Converter::IntToLittleEndianHex(buf, 0);
+  Converter::IntToLittleEndianHex(buf, numInodes);
   file.write(reinterpret_cast<const char *>(buf), 4);
 
   // 0x04 total blocks
-  Converter::IntToLittleEndianHex(buf, size / EXT2_BLOCK_SIZE);
+  Converter::IntToLittleEndianHex(buf, numBlocks);
   file.write(reinterpret_cast<const char *>(buf), 4);
 
   // 0x08 reserved blocks
@@ -97,21 +103,24 @@ void Ext2::writeBSB()
   file.write(reinterpret_cast<const char *>(buf), 4);
 
   // 0x14 first data block
-  Converter::IntToLittleEndianHex(buf, 0);
+  Converter::IntToLittleEndianHex(buf, 1);
   file.write(reinterpret_cast<const char *>(buf), 4);
 
-  // TODO this is wrong
   // 0x18 log2(block size) - 10
-  lli log2 = 0;
-  while (EXT2_BLOCK_SIZE >> log2 != 1)
-  {
-    log2++;
-  }
-  Converter::IntToLittleEndianHex(buf, log2);
+  lli log2size = 0;
+
+  log2size = (lli)log2((double)EXT2_BLOCK_SIZE) - 10;
+
+  if (log2size == 0)
+    log2size++;
+
+  printf("log2size: %lld\n", log2size);
+
+  Converter::IntToLittleEndianHex(buf, log2size);
   file.write(reinterpret_cast<const char *>(buf), 4);
 
   // 0x1C log2(fragment size) - 10
-  Converter::IntToLittleEndianHex(buf, log2);
+  Converter::IntToLittleEndianHex(buf, log2size);
   file.write(reinterpret_cast<const char *>(buf), 4);
 
   // 0x20 blocks per group
@@ -191,8 +200,7 @@ void Ext2::writeBSB()
  * @brief write extended superblock
  *
  */
-void Ext2::writeESB()
-{
+void Ext2::writeESB() {
   std::fstream file;
   file.open(fname);
   // seek forwards to the superblock then skip the basic superblock
@@ -233,13 +241,11 @@ void Ext2::writeESB()
   Converter::u64ToLittleEndianHex(b2, guid_p2);
 
   // write the guid
-  for (int i = 0; i < 8; i++)
-  {
+  for (int i = 0; i < 8; i++) {
     file.write(reinterpret_cast<const char *>(&b1[i]), 1);
   }
 
-  for (int i = 0; i < 8; i++)
-  {
+  for (int i = 0; i < 8; i++) {
     file.write(reinterpret_cast<const char *>(&b2[i]), 1);
   }
 
@@ -247,46 +253,7 @@ void Ext2::writeESB()
   delete[] b1;
   delete[] b2;
 
-  // 0x24 volume name
-  std::string volName = "EXT2";
-  file.write(volName.c_str(), 16);
-
-  // 0x34 last mount path
-  std::string path = "/";
-  file.write(path.c_str(), 64);
-
-  // 0x74 compression algorithms
-  Converter::IntToLittleEndianHex(buf, 0);
-  file.write(reinterpret_cast<const char *>(buf), 4);
-
-  // 0x78 preallocated blocks for files
-  Converter::IntToLittleEndianHex(buf, 0);
-  file.write(reinterpret_cast<const char *>(buf), 1);
-
-  // 0x79 preallocated blocks for directories
-  Converter::IntToLittleEndianHex(buf, 0);
-  file.write(reinterpret_cast<const char *>(buf), 1);
-
-  // 0x7A reserved
-  Converter::IntToLittleEndianHex(buf, 0);
-  file.write(reinterpret_cast<const char *>(buf), 2);
-
-  // 0x7C journal id
-  Converter::IntToLittleEndianHex(buf, 0);
-  file.write(reinterpret_cast<const char *>(buf), 4);
-
-  // 0x80 journal inode
-  Converter::IntToLittleEndianHex(buf, 0);
-  file.write(reinterpret_cast<const char *>(buf), 4);
-
-  // 0x84 journal device
-  Converter::IntToLittleEndianHex(buf, 0);
-  file.write(reinterpret_cast<const char *>(buf), 4);
-
-  // 0x88 orphan inode list head
-  Converter::IntToLittleEndianHex(buf, 0);
-  file.write(reinterpret_cast<const char *>(buf), 4);
-
+  
   // done with extended superblock
   file.close();
   delete[] buf;
@@ -297,25 +264,24 @@ void Ext2::writeESB()
  * @brief write block group descriptor table
  *
  */
-void Ext2::writeBGDT()
-{
+void Ext2::writeBGDT() {
   std::fstream file;
   file.open(fname);
 
   // seek forwards to the block group descriptor table
-  file.seekp(1024 + 1024);
+  file.seekp(EXT2_BLOCK_SIZE * 3);
 
   // 0x00 block bitmap block
   auto *buf = new unsigned char[4];
-  Converter::IntToLittleEndianHex(buf, 2);
-  file.write(reinterpret_cast<const char *>(buf), 4);
-
-  // 0x04 inode bitmap block
   Converter::IntToLittleEndianHex(buf, 3);
   file.write(reinterpret_cast<const char *>(buf), 4);
 
-  // 0x08 inode table block
+  // 0x04 inode bitmap block
   Converter::IntToLittleEndianHex(buf, 4);
+  file.write(reinterpret_cast<const char *>(buf), 4);
+
+  // 0x08 inode table block
+  Converter::IntToLittleEndianHex(buf, 5);
   file.write(reinterpret_cast<const char *>(buf), 4);
 
   // 0x0C free blocks count
