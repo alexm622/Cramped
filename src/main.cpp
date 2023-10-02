@@ -36,6 +36,14 @@ int main(int argc, char *argv[])
     format = Main::format_from_string(format_str);
   }
 
+  // TODO I want to validate the format BEFORE writing a file
+  if(format == Format_e::UNKNOWN){
+      printf("Format is invalid\n");
+      std::cout << Main::desc << std::endl;
+      return 1;
+
+  }
+
   if (Main::vm.count("create"))
   {
     create = true;

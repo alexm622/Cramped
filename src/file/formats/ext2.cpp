@@ -100,6 +100,7 @@ void Ext2::writeBSB()
   Converter::IntToLittleEndianHex(buf, 0);
   file.write(reinterpret_cast<const char *>(buf), 4);
 
+  // TODO this is wrong
   // 0x18 log2(block size) - 10
   lli log2 = 0;
   while (EXT2_BLOCK_SIZE >> log2 != 1)
